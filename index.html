@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0055A5">
+<title>Kuitansi COS PWA</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kuitansi COS">
+<link rel="stylesheet" href="css/style.css?v=22">
+</head>
+<body>
+<div id="loginView" hidden>
+  <div class="card">
+    <div class="login-head">
+      <img class="login-logo" src="icons/icon-192.png" alt="Logo Kuitansi COS" width="72" height="72">
+      <h1 class="login-judul">SISTEM APLIKASI KUITANSI IURAN COS</h1>
+      <div class="login-sub">PP FSP RTMM-SPSI</div>
+      <p class="login-desk">Kelola administrasi setoran iuran anggota PUK secara cepat, transparan, dan terverifikasi.</p>
+    </div>
+    <label for="lId">Nama Pengguna / ID</label>
+    <input id="lId" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+    <label for="lPass">Kata Sandi</label>
+    <input id="lPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn" style="width:100%;padding:15px 16px;font-size:17px;margin-top:18px" onclick="doLogin()">Masuk</button>
+    <button type="button" class="btn alt btn-pasang" id="btnPasang" onclick="pasangAplikasi()" hidden>Pasang Aplikasi di HP</button>
+  </div>
+</div>
+
+<div id="appView" hidden>
+  <header>
+    <div><b id="who"></b><small id="role"></small></div>
+    <div class="hdr-aksi"><a id="btnBantuan" class="bantuan-ikon" href="https://wa.me/6281383179209" target="_blank" rel="noopener" onclick="return bukaBantuanWA(this)" aria-label="Bantuan lewat WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.4a2.6 2.6 0 0 1 5 1c0 1.7-2.5 2.2-2.5 3.9"/><circle cx="12" cy="17.4" r=".6"/></svg></a><button onclick="doLogout()">Keluar</button></div>
+  </header>
+  <nav id="nav" aria-label="Menu utama"></nav>
+  <main id="content" aria-live="polite"></main>
+</div>
+
+<div id="busy" hidden role="status">Memproses...</div>
+<div id="toast" hidden role="alert"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script src="js/config.js?v=16"></script>
+<script src="js/util.js?v=15"></script>
+<script src="js/state.js?v=17"></script>
+<script src="js/kop.js?v=1"></script>
+<script src="js/kuitansi.js?v=18"></script>
+<script src="js/pc.js?v=21"></script>
+<script src="js/ui.js?v=18"></script>
+<script src="js/transactions.js?v=5"></script>
+<script src="js/laporan.js?v=6"></script>
+<script src="js/auth.js?v=15"></script>
+<script src="js/pwa.js?v=15"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
