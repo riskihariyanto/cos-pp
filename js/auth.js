@@ -14,7 +14,7 @@ auth.onAuthStateChanged(async user => {
       await auth.signOut();
       return;
     }
-    const admin = p.role === 'pc' || p.role === 'superadmin';
+    const admin = p.role === 'superadmin';
     const puk = p.role === 'puk' && !!p.pukId;
     if (!admin && !puk) {
       toast('Akun ini tidak memiliki akses.');
