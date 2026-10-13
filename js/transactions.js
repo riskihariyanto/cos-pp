@@ -64,6 +64,16 @@ function muatCacheKas() {
   hitungTotal();
 }
 
+function hapusCacheKas() {
+  try {
+    localStorage.removeItem(KUNCI_CACHE_KAS);
+  } catch (e) {}
+  saldoServer = 0;
+  kasList = [];
+  kasIds = {};
+  hitungTotal();
+}
+
 function terapkanKas(v) {
   const data = v || {};
   const arr = Object.keys(data).map(k => Object.assign({}, data[k], { id: k }));
@@ -103,14 +113,17 @@ function sinkronKas() {
       terkirim++;
       hapusAntrian(x.id);
     }).catch(e => {
-      if (/PERMISSION_DENIED/.test((e && e.message) || '')) ditolak++;
+      if (/PERMISSION_DENIED/.test((e && e.message) || '')) {
+        ditolak++;
+        hapusAntrian(x.id);
+      }
     }));
   });
   return rantai.then(() => {
     sedangSinkron = false;
     hitungTotal();
     render();
-    if (ditolak) toast('Belum bisa disimpan: aturan database belum mengizinkan kas. Data tetap aman di HP.');
+    if (ditolak) toast('Transaksi kas ditolak aturan database dan dihapus dari antrean HP.');
     else if (terkirim) toast(terkirim === 1 ? 'Transaksi kas tersimpan' : terkirim + ' transaksi kas tersinkron');
     if (terkirim && antrianKas().length) return sinkronKas();
   });
@@ -327,8 +340,20 @@ const attachAsli = attach;
 
 attach = function () {
   attachAsli();
-  if (!isPC()) return;
-  listen('kas', v => { terapkanKas(v); });
+  if (!isPC()) {
+    hapusCacheKas();
+    return;
+  }
+  const ref = db.ref('kas');
+  ref.on('value', snap => {
+    terapkanKas(snap.val());
+    render();
+  }, e => {
+    hapusCacheKas();
+    render();
+    toast('Gagal memuat data: ' + pesan(e));
+  });
+  S.refs.push(ref);
   sinkronKas();
 };
 
