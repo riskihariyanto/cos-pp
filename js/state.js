@@ -2,6 +2,8 @@ const S = {
   profile: null,
   puk: {},
   iuran: {},
+  laporan: {},
+  akun: {},
   pengaturan: {},
   tab: '',
   lastTab: '',
@@ -17,12 +19,16 @@ const isSuperAdmin = () => !!(S.profile && S.profile.role === 'superadmin');
 
 const isPC = () => !!(S.profile && (S.profile.role === 'pc' || S.profile.role === 'superadmin'));
 
+const isPUK = () => !!(S.profile && S.profile.role === 'puk' && S.profile.pukId);
+
 const pengaturanDibuka = () => isPC() && location.hash === RUTE_PENGATURAN;
 
 function resetData() {
   S.profile = null;
   S.puk = {};
   S.iuran = {};
+  S.laporan = {};
+  S.akun = {};
   S.pengaturan = {};
 }
 
@@ -52,6 +58,15 @@ function listen(path, apply) {
 
 function attach() {
   listen('pengaturan', v => { S.pengaturan = v || {}; });
+  if (isPUK()) {
+    const pid = S.profile.pukId;
+    listen('puk/' + pid, v => { S.puk = v ? { [pid]: v } : {}; });
+    listen('iuran/' + pid, v => { S.iuran = { [pid]: v || {} }; });
+    listen('laporanBayar/' + pid, v => { S.laporan = { [pid]: v || {} }; });
+    return;
+  }
   listen('puk', v => { S.puk = v || {}; });
   listen('iuran', v => { S.iuran = v || {}; });
+  listen('laporanBayar', v => { S.laporan = v || {}; });
+  listen('users', v => { S.akun = v || {}; });
 }
