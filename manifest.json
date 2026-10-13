@@ -1,7 +1,7 @@
 {
   "name": "Kuitansi COS PWA",
   "short_name": "Kuitansi COS",
-  "description": "Pencatatan iuran COS dan penerbitan kuitansi untuk PUK, PC, PD, dan PP",
+  "description": "Pencatatan iuran COS dan penerbitan kuitansi untuk Pimpinan Pusat FSP RTMM-SPSI dan PUK",
   "lang": "id",
   "id": "./",
   "start_url": "./index.html",
