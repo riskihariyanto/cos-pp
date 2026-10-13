@@ -1,4 +1,4 @@
-const INPUT_RUPIAH = ['fTotal'];
+const INPUT_RUPIAH = ['fTotal', 'lTotal'];
 const NOMOR_BANTUAN = '6281383179209';
 
 const GAYA_LANSIA = `
@@ -44,20 +44,44 @@ const VIEWS = {
   dasbor: viewDasbor,
   catat: viewCatat,
   kuitansi: viewRiwayatKuitansi,
+  laporan: viewLaporanMasuk,
+  akun: viewAkunPUK,
+  beranda: viewPukBeranda,
+  lapor: viewPukLapor,
+  kuitansiku: viewPukKuitansi,
   pengaturan: viewPengaturan
 };
 
 const IKON_NAV = {
   dasbor: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   catat: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-  kuitansi: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'
+  kuitansi: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  laporan: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  akun: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  beranda: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/>'
 };
+IKON_NAV.kuitansiku = IKON_NAV.kuitansi;
+IKON_NAV.lapor = IKON_NAV.catat;
 
 const TABS_PC = [
   ['dasbor', 'Status Pembayaran', 'Status'],
+  ['laporan', 'Laporan Masuk', 'Laporan'],
   ['catat', 'Buat Kuitansi', 'Catat'],
-  ['kuitansi', 'Riwayat Kuitansi', 'Riwayat']
+  ['kuitansi', 'Riwayat Kuitansi', 'Riwayat'],
+  ['akun', 'Akun PUK', 'Akun']
 ];
+
+const TABS_PUK = [
+  ['beranda', 'Beranda', 'Beranda'],
+  ['lapor', 'Lapor Pembayaran', 'Lapor'],
+  ['kuitansiku', 'Kuitansi Saya', 'Kuitansi']
+];
+
+const TAB_UTAMA = ['catat', 'lapor'];
+
+function tabsAktif() {
+  return isPUK() ? TABS_PUK : TABS_PC;
+}
 
 function showTab(t) {
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
@@ -71,18 +95,19 @@ function render() {
   $('loginView').hidden = true;
   $('appView').hidden = false;
 
-  const tabs = TABS_PC;
+  const tabs = tabsAktif();
   if (pengaturanDibuka()) S.tab = 'pengaturan';
   else if (!tabs.some(t => t[0] === S.tab)) S.tab = tabs[0][0];
 
-  $('who').textContent = S.pengaturan.namaPC || 'PP FSP RTMM-SPSI';
-  $('role').textContent = 'Dashboard PP';
+  $('who').textContent = isPUK() ? 'PUK ' + namaPUKSaya() : (S.pengaturan.namaPC || 'PP FSP RTMM-SPSI');
+  $('role').textContent = isPUK() ? 'Akun PUK' : 'Dashboard PP';
 
   $('nav').innerHTML = tabs.map(t => {
     const aktif = t[0] === S.tab;
-    const kelas = (t[0] === 'catat' ? 'utama' : '') + (aktif ? ' on' : '');
+    const kelas = (TAB_UTAMA.indexOf(t[0]) >= 0 ? 'utama' : '') + (aktif ? ' on' : '');
+    const n = t[0] === 'laporan' ? jumlahLaporanMenunggu() : 0;
     return '<button class="' + kelas.trim() + '" aria-label="' + esc(t[1]) + '"' + (aktif ? ' aria-current="page"' : '') + ' onclick="showTab(\'' + t[0] + '\')">' +
-      '<span class="nav-ikon"><svg viewBox="0 0 24 24" aria-hidden="true">' + IKON_NAV[t[0]] + '</svg></span>' +
+      '<span class="nav-ikon"><svg viewBox="0 0 24 24" aria-hidden="true">' + IKON_NAV[t[0]] + '</svg>' + (n ? '<i class="nav-badge">' + n + '</i>' : '') + '</span>' +
       '<span class="nav-label">' + esc(t[2]) + '</span></button>';
   }).join('');
 
@@ -181,8 +206,8 @@ window.addEventListener('hashchange', render);
 function pesanBantuan() {
   const baris = ['Halo, saya mengalami kendala pada aplikasi Kuitansi COS.', ''];
   if (S && S.profile) {
-    baris.push('Pengguna: ' + ((S.pengaturan && S.pengaturan.namaPC) || 'PP FSP RTMM-SPSI'));
-    const tab = TABS_PC.filter(t => t[0] === S.tab)[0];
+    baris.push('Pengguna: ' + (isPUK() ? 'PUK ' + namaPUKSaya() : ((S.pengaturan && S.pengaturan.namaPC) || 'PP FSP RTMM-SPSI')));
+    const tab = tabsAktif().filter(t => t[0] === S.tab)[0];
     if (tab) baris.push('Menu: ' + tab[1]);
   }
   baris.push('Kendala: ');
