@@ -327,6 +327,7 @@ const attachAsli = attach;
 
 attach = function () {
   attachAsli();
+  if (!isPC()) return;
   listen('kas', v => { terapkanKas(v); });
   sinkronKas();
 };
