@@ -14,8 +14,15 @@ auth.onAuthStateChanged(async user => {
       await auth.signOut();
       return;
     }
-    if (p.role !== 'pc' && p.role !== 'superadmin') {
-      toast('Akun ini tidak memiliki akses. Hanya Admin PP yang dapat masuk.');
+    const admin = p.role === 'pc' || p.role === 'superadmin';
+    const puk = p.role === 'puk' && !!p.pukId;
+    if (!admin && !puk) {
+      toast('Akun ini tidak memiliki akses.');
+      await auth.signOut();
+      return;
+    }
+    if (puk && p.aktif === false) {
+      toast('Akun PUK ini dinonaktifkan oleh PP.');
       await auth.signOut();
       return;
     }
