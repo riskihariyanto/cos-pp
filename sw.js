@@ -1,4 +1,4 @@
-const VERSI = 'cos-pp-v2';
+const VERSI = 'cos-pp-v3';
 
 const SHELL = [
   './',
@@ -13,6 +13,8 @@ const SHELL = [
   './js/kop.js',
   './js/kuitansi.js',
   './js/pc.js',
+  './js/puk.js',
+  './js/akun.js',
   './js/ui.js',
   './js/transactions.js',
   './js/laporan.js',
