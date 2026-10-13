@@ -17,7 +17,7 @@ const RUTE_PENGATURAN = '#/super-admin-secret-settings';
 
 const isSuperAdmin = () => !!(S.profile && S.profile.role === 'superadmin');
 
-const isPC = () => !!(S.profile && (S.profile.role === 'pc' || S.profile.role === 'superadmin'));
+const isPC = isSuperAdmin;
 
 const isPUK = () => !!(S.profile && S.profile.role === 'puk' && S.profile.pukId);
 
