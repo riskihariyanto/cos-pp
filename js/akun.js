@@ -124,7 +124,8 @@ function daftarAkunPUK() {
 
 function viewAkunPUK() {
   const opsi = '<option value="">Pilih PUK</option>' +
-    sortedPUK().map(pid => '<option value="' + esc(pid) + '">PUK ' + esc(namaPUKDari(pid)) + '</option>').join('');
+    sortedPUK().map(pid => '<option value="' + esc(pid) + '">PUK ' + esc(namaPUKDari(pid)) + '</option>').join('') +
+    '<option value="__baru">+ PUK baru (ketik nama sendiri)</option>';
   const akun = daftarAkunPUK();
   const baris = akun.map(a => {
     const aktif = a.aktif !== false;
@@ -135,7 +136,8 @@ function viewAkunPUK() {
   }).join('');
   return '<section class="card"><h3>Buat Akun PUK</h3>' +
     '<p class="hint">Akun PUK dapat melihat, mengunduh, dan mencetak kuitansi miliknya serta melaporkan pembayaran iuran ke PP.</p>' +
-    '<label for="aPuk">Nama PUK</label><select id="aPuk">' + opsi + '</select>' +
+    '<label for="aPuk">Nama PUK</label><select id="aPuk" onchange="ubahPilihanPUKAkun()">' + opsi + '</select>' +
+    '<div id="aPukBaruBox" hidden><label for="aPukBaru">Nama PUK baru</label><input id="aPukBaru" autocomplete="off" placeholder="Ketik nama PUK, tanpa kata PUK"></div>' +
     '<label for="aId">ID login (huruf kecil, angka, titik, strip)</label><input id="aId" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="puk-namaperusahaan">' +
     '<label for="aNama">Nama pengurus PUK (opsional)</label><input id="aNama" autocomplete="off">' +
     '<label for="aPass">Kata sandi awal (minimal 6 karakter)</label><input id="aPass" type="text" autocomplete="off" autocapitalize="none" spellcheck="false">' +
@@ -144,13 +146,30 @@ function viewAkunPUK() {
     (baris || '<p class="hint">Belum ada akun PUK.</p>') + '</section>';
 }
 
+function ubahPilihanPUKAkun() {
+  const kotak = $('aPukBaruBox');
+  if (kotak) kotak.hidden = $('aPuk').value !== '__baru';
+}
+
 async function buatAkunPUK() {
   if (!isPC()) return toast('Akses ditolak');
-  const pid = $('aPuk').value;
+  let pid = $('aPuk').value;
   const id = $('aId').value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
   const sandi = $('aPass').value;
   const nama = $('aNama').value.trim().slice(0, 100);
-  if (!pid || !S.puk[pid]) return toast('Pilih PUK terlebih dahulu');
+  let namaPUK = '';
+  let pukBaru = false;
+  if (pid === '__baru') {
+    namaPUK = bersihNamaPUK($('aPukBaru').value).slice(0, 100);
+    if (!namaPUK) return toast('Isi nama PUK baru');
+    pid = cariPUK(namaPUK);
+    if (!pid) {
+      pid = db.ref('puk').push().key;
+      pukBaru = true;
+    }
+  } else if (!pid || !S.puk[pid]) {
+    return toast('Pilih PUK terlebih dahulu');
+  }
   if (id.length < 4) return toast('ID login minimal 4 karakter');
   if (sandi.length < 6) return toast('Kata sandi minimal 6 karakter');
   const ok = await jalankan(async () => {
@@ -178,11 +197,12 @@ async function buatAkunPUK() {
       }
     }
     try {
+      if (pukBaru) await db.ref('puk/' + pid).set({ namaPerusahaan: namaPUK });
       await db.ref('users/' + uid).set({
         role: 'puk',
         pukId: pid,
         id: id,
-        nama: nama || S.puk[pid].namaPerusahaan,
+        nama: nama || (S.puk[pid] || {}).namaPerusahaan || namaPUK,
         aktif: true,
         dibuat: firebase.database.ServerValue.TIMESTAMP
       });
@@ -192,8 +212,9 @@ async function buatAkunPUK() {
     return true;
   }, 'Akun PUK dibuat');
   if (ok) {
-    ['aId', 'aNama', 'aPass'].forEach(k => { $(k).value = ''; });
+    ['aId', 'aNama', 'aPass', 'aPukBaru'].forEach(k => { if ($(k)) $(k).value = ''; });
     $('aPuk').value = '';
+    ubahPilihanPUKAkun();
   }
 }
 
