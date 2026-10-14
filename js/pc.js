@@ -49,12 +49,24 @@ function periodeDefault(tgl) {
   return { b: bulanIni - 1, t: now.getFullYear() };
 }
 
+function tanggalCatat() {
+  return /^\d{4}-\d{2}-\d{2}$/.test(S.tmp.catatTgl || '') ? S.tmp.catatTgl : hariIniLokal();
+}
+
 function periodeCatat() {
-  const d = periodeDefault();
+  const [y, m, h] = tanggalCatat().split('-').map(Number);
+  const d = periodeDefault(new Date(y, m - 1, h));
   return {
     b: S.tmp.catatBulan || d.b,
     t: S.tmp.catatTahun || d.t
   };
+}
+
+function ubahTanggalCatat() {
+  S.tmp.catatTgl = $('fTanggal').value;
+  S.tmp.catatBulan = undefined;
+  S.tmp.catatTahun = undefined;
+  render();
 }
 
 function ubahPeriodeCatat() {
@@ -165,7 +177,7 @@ function viewRiwayatKuitansi() {
 }
 
 function viewCatat() {
-  const hari = new Date().toISOString().slice(0, 10);
+  const hari = tanggalCatat();
   const nama = S.tmp.pukNama || '';
   const pid = cariPUK(nama);
   const { b, t } = periodeCatat();
@@ -182,8 +194,10 @@ function viewCatat() {
     '<label for="fPukPilih">Nama PUK</label>' +
     '<select id="fPukPilih" onchange="ubahPUKCatat()">' + optPuk + '</select>' +
     (pilih === '__baru' ? '<label for="fPuk">Nama PUK baru</label><input id="fPuk" autocomplete="off" placeholder="Ketik nama PUK, tanpa kata PUK" value="' + esc(nama) + '" onchange="ubahPUKCatat()">' : '') +
-    '<label for="fBulan">Bulan</label><select id="fBulan" onchange="ubahPeriodeCatat()">' + optBulan + '</select>' +
-    '<label for="fTahun">Tahun</label><input id="fTahun" type="number" value="' + t + '" onchange="ubahPeriodeCatat()">';
+    '<label for="fTanggal">Tanggal terima</label><input id="fTanggal" type="date" value="' + hari + '" onchange="ubahTanggalCatat()">' +
+    '<label for="fBulan">Periode iuran (bulan)</label><select id="fBulan" onchange="ubahPeriodeCatat()">' + optBulan + '</select>' +
+    '<label for="fTahun">Tahun</label><input id="fTahun" type="number" value="' + t + '" onchange="ubahPeriodeCatat()">' +
+    '<p class="hint">Iuran yang dibayar pada bulan berjalan dihitung untuk bulan sebelumnya. Diterima ' + esc(fmtTgl(hari)) + ', periode iuran ' + esc(labelPeriode(key)) + '.</p>';
 
   if (pid && periodeKunci(ada)) {
     return kepala + '<p class="peringatan">' + esc(pesanAdmin()) + '</p>' + panelTerkunci(pid, key, ada) + '</section>';
@@ -191,7 +205,6 @@ function viewCatat() {
   return kepala +
     '<label for="fMetode">Metode</label><select id="fMetode"><option value="Tunai">Cash (Tunai)</option><option value="Transfer">Transfer</option></select>' +
     '<label for="fTotal">Total Nominal Setoran (Rp)</label><input id="fTotal" type="number" inputmode="numeric" placeholder="20000000">' +
-    '<label for="fTanggal">Tanggal terima</label><input id="fTanggal" type="date" value="' + hari + '">' +
     '<p class="hint">Kuitansi langsung terbit dan sah setelah disimpan.</p>' +
     '<button class="btn" onclick="catatSetoran()">Terbitkan Kuitansi</button></section>';
 }
@@ -218,7 +231,7 @@ async function catatSetoran() {
       pid = db.ref('puk').push().key;
       await db.ref('puk/' + pid).set({ namaPerusahaan: nama });
     }
-    const hariIni = new Date().toISOString().slice(0, 10);
+    const hariIni = hariIniLokal();
     const nomor = await nextNomor(namaTersimpan, bulan, tahun);
     const data = {
       periode: key,
@@ -236,14 +249,28 @@ async function catatSetoran() {
     const berhasil = await klaimPeriode(pid, key, data);
     if (!berhasil) throw new Error('Kuitansi untuk PUK dan bulan ini sudah diterbitkan');
     if (ada) await db.ref('bukti/' + pid + '/' + key).remove().catch(() => {});
-    return true;
+    return nomor;
   }, 'Kuitansi diterbitkan');
   if (ok) {
     S.tmp.pukNama = '';
     S.tmp.pukBaru = false;
+    S.tmp.catatTgl = '';
+    S.tmp.catatBulan = undefined;
+    S.tmp.catatTahun = undefined;
     S.lastTab = '';
     render();
-    animasiBerhasil('Kuitansi Terbit', 'PUK ' + namaTersimpan + ' · ' + rp(total));
+    animasiBerhasil({
+      judul: 'Kuitansi Terbit',
+      labelNominal: 'Total Setoran',
+      nominal: total,
+      baris: [
+        ['PUK', namaTersimpan],
+        ['Periode', labelPeriode(key)],
+        ['Metode', labelMetode(metode)],
+        ['Diterima', fmtTgl(tgl)],
+        ['Nomor', ok]
+      ]
+    });
   }
 }
 
