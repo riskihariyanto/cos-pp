@@ -239,8 +239,11 @@ async function catatSetoran() {
     return true;
   }, 'Kuitansi diterbitkan');
   if (ok) {
-    S.tmp.pukNama = namaTersimpan;
+    S.tmp.pukNama = '';
+    S.tmp.pukBaru = false;
+    S.lastTab = '';
     render();
+    animasiBerhasil('Kuitansi Terbit', 'PUK ' + namaTersimpan + ' · ' + rp(total));
   }
 }
 
