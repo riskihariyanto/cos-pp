@@ -259,7 +259,7 @@ const GAYA_LAPORAN = `
 .lap-periode{margin-top:4px;font-size:12.5px;color:#555;text-align:center}
 .lap-awal{margin:18px 0 8px;font-size:13px;font-weight:700}
 .lap-tabel{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}
-.lap-tabel th{padding:7px 6px;color:#fff;background:#0055a5;border:1px solid #bec4cc;font-weight:700;text-align:center}
+.lap-tabel th{padding:7px 6px;color:#fff;background:#0055a5;border:1px solid #bec4cc;font-size:11.5px;font-weight:700;text-align:center;text-transform:none}
 .lap-tabel td{padding:6px;border:1px solid #bec4cc;vertical-align:top;overflow-wrap:anywhere}
 .lap-tabel td.t{white-space:nowrap}
 .lap-tabel td.a{text-align:right;white-space:nowrap}
@@ -320,7 +320,7 @@ function skalaLaporan() {
   const w = $('lapWrap');
   const k = $('lapKertas');
   if (!st || !w || !k) return;
-  const s = Math.max(0.2, Math.min((st.clientWidth - 24) / LEBAR_LAPORAN, 1.5));
+  const s = Math.max(0.2, Math.min((st.clientWidth - 24) / LEBAR_LAPORAN, 1.25));
   w.style.width = (LEBAR_LAPORAN * s).toFixed(1) + 'px';
   w.style.height = (k.offsetHeight * s).toFixed(1) + 'px';
   k.style.transform = 'scale(' + s.toFixed(4) + ')';
