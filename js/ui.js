@@ -106,7 +106,7 @@ const GAYA_DESKTOP = `
 @media (min-width:1000px){
   header{position:sticky;top:0;z-index:12;height:76px;padding:0 28px}
   header b{font-size:19px}
-  nav{top:76px;left:0;right:auto;bottom:0;width:244px;max-width:none;margin:0;padding:18px 14px;flex-direction:column;justify-content:flex-start;gap:6px;overflow-y:auto;background:#fff;border:0;border-right:1px solid #dce5ef;border-radius:0;box-shadow:none}
+  nav{top:76px;left:0;right:auto;bottom:0;width:272px;max-width:none;margin:0;padding:18px 14px;flex-direction:column;justify-content:flex-start;gap:6px;overflow-y:auto;background:#fff;border:0;border-right:1px solid #dce5ef;border-radius:0;box-shadow:none}
   nav button,nav button.utama{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:14px;min-height:50px;padding:0 16px;border-radius:12px;font-size:15px;font-weight:600;letter-spacing:0;text-align:left;color:#475569;transition:background .15s ease,color .15s ease}
   nav button:hover:not(.on){background:#eef4fb;color:#0756a3}
   nav button.on,nav button.utama.on{background:#0756a3;color:#fff}
@@ -117,15 +117,58 @@ const GAYA_DESKTOP = `
   nav button.utama.on{color:#fff;background:#0756a3;box-shadow:none}
   nav button.utama .nav-ikon,nav button.utama.on .nav-ikon{width:26px;height:26px;margin:0;border:0;background:none;box-shadow:none;color:inherit}
   nav button.utama svg{width:26px;height:26px;stroke-width:2.4}
-  main{margin:0 0 0 244px;max-width:none;padding:30px max(32px,calc((100vw - 244px - 1240px)/2)) 56px}
+  main{margin:0 0 0 272px;max-width:none;padding:30px max(32px,calc((100vw - 272px - 1240px)/2)) 56px}
   #toast{bottom:28px}
   body:has(#appView:not([hidden])) #toast{bottom:28px}
   body:has(#appView:not([hidden])) .pwa-bar{left:auto;right:20px;bottom:20px;margin:0}
+  header{background:#0b4a8c;border-bottom:2px solid #f4b942;box-shadow:0 1px 0 rgba(7,47,88,.18)}
+  header small{margin-top:2px;font-size:13px;opacity:.82}
+  header button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:10px;box-shadow:none;padding:8px 18px;font-size:14px;transition:background .15s ease}
+  header button:hover{background:rgba(255,255,255,.14);color:#fff;border-color:#fff}
+  header button:focus-visible,nav button:focus-visible{outline:3px solid #f4b942;outline-offset:2px}
+  nav{padding:20px 14px;gap:4px}
+  nav button,nav button.utama{min-height:46px;border-radius:10px;font-size:15px;position:relative}
+  nav button svg{width:22px;height:22px}
+  nav button.on{background:#e8f1fb;color:#063e78;box-shadow:none}
+  nav button.on::before{content:"";position:absolute;left:-14px;top:9px;bottom:9px;width:4px;border-radius:0 4px 4px 0;background:#0756a3}
+  nav button.utama{margin:10px 0 6px;background:#0756a3;color:#fff;box-shadow:none}
+  nav button.utama:hover:not(.on){background:#063e78;color:#fff}
+  nav button.utama.on{background:#063e78;color:#fff}
+  nav button.utama.on::before{display:none}
+  nav button.utama svg{width:22px;height:22px;stroke-width:2.2}
+  nav button.utama .nav-ikon,nav button.utama.on .nav-ikon{width:22px;height:22px}
+  main{background:#f3f6fa}
+  .card{border-color:#dfe6ef;border-radius:14px;box-shadow:0 1px 2px rgba(20,50,80,.05);padding:22px 24px}
+  .card h3{font-size:18px;margin-bottom:14px}
+  .kas-saldo{padding:18px 26px;border-radius:12px}
+  .kas-saldo-nilai{font-size:34px}
+  .kpi-panel{border-radius:12px;border-color:#dfe6ef}
+  .kpi-label{letter-spacing:.08em}
+  .fgrid{display:grid;gap:0 18px}
+  .fgrid.fg3{grid-template-columns:1.2fr 1.4fr .8fr}
+  .fgrid.fg2{grid-template-columns:1fr 1.2fr}
+  .fgrid>div{min-width:0}
+  .card:has(.fgrid){max-width:760px}
+  .card .btn{min-width:0;padding-left:28px;padding-right:28px}
+  .card:has(#fTotal) .btn{margin-top:10px}
   .rk-aksi button:hover,.sub-tab button:not(.on):hover,.kas-jenis button:hover{background:#eaf1fa}
   .rk-aksi button,.sub-tab button,.kas-jenis button,.btn{transition:background .15s ease}
+  nav button,nav button.utama{padding:0 12px;gap:12px}
+  .rk-item{border-color:#dfe6ef;border-radius:14px;padding:16px 18px;margin-bottom:0;box-shadow:0 1px 2px rgba(20,50,80,.05)}
+  .rk-nama{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+  .rk-nama .lencana,.rk-nama .badge{margin-left:0}
+  .rk-aksi button{border-width:1px;border-color:#cfdbea}
+  .rk-aksi button:disabled{background:#f6f8fb;color:#7c8aa0;border-color:#e3e9f1;opacity:1}
+  .rk-wa{font-weight:700;box-shadow:none;transition:background .15s ease}
+  .rk-wa:hover{background:#20c05c}
+  .rk-item>.btn{width:100%;min-height:48px;margin-top:10px;padding:12px 16px;font-size:17px}
+  .row{border-top-color:#e6ebf2}
+  .row .btn.sm{min-height:40px;padding:8px 16px;font-size:14px;border-width:1px;border-color:#b9cde4}
+  .row .btn.sm:hover{background:#eaf1fa}
+  .sub-tab button{transition:background .15s ease}
 }
 @media (min-width:1500px){
-  main{padding-left:max(40px,calc((100vw - 244px - 1380px)/2));padding-right:max(40px,calc((100vw - 244px - 1380px)/2))}
+  main{padding-left:max(40px,calc((100vw - 272px - 1380px)/2));padding-right:max(40px,calc((100vw - 272px - 1380px)/2))}
   .rk{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
 }
 `;
@@ -263,7 +306,7 @@ pasangKetukRahasia();
 window.addEventListener('hashchange', render);
 
 function pesanBantuan() {
-  const baris = ['Halo, saya mengalami kendala pada aplikasi Kuitansi COS.', ''];
+  const baris = ['Halo Mas Riski, saya mengalami kendala pada aplikasi Kuitansi COS.', ''];
   if (S && S.profile) {
     baris.push('Pengguna: ' + (isPUK() ? 'PUK ' + namaPUKSaya() : ((S.pengaturan && S.pengaturan.namaPC) || 'PP FSP RTMM-SPSI')));
     const tab = tabsAktif().filter(t => t[0] === S.tab)[0];
