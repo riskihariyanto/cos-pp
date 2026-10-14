@@ -1,5 +1,5 @@
-const KUNCI_CACHE_KAS = 'cos_kas_cache';
-const KUNCI_ANTRIAN_KAS = 'cos_kas_antrian';
+const KUNCI_DASAR_CACHE = 'cos_kas_cache';
+const KUNCI_DASAR_ANTRIAN = 'cos_kas_antrian';
 const BATAS_BARIS_KAS = 200;
 const BATAS_KARTU_KAS = 100;
 
@@ -14,6 +14,22 @@ let sedangSinkron = false;
 let pengenalSuara = null;
 
 const IKON_MIK = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/></svg>';
+
+function sufiksKas() {
+  return isPUK() ? ':' + pidSaya() : '';
+}
+
+function kunciCacheKas() {
+  return KUNCI_DASAR_CACHE + sufiksKas();
+}
+
+function kunciAntrianKas() {
+  return KUNCI_DASAR_ANTRIAN + sufiksKas();
+}
+
+function pathKas() {
+  return isPUK() ? 'kasPuk/' + pidSaya() : 'kas';
+}
 
 function bacaJson(kunci, cadangan) {
   try {
@@ -31,12 +47,12 @@ function simpanJson(kunci, nilai) {
 }
 
 function antrianKas() {
-  const daftar = bacaJson(KUNCI_ANTRIAN_KAS, []);
+  const daftar = bacaJson(kunciAntrianKas(), []);
   return Array.isArray(daftar) ? daftar : [];
 }
 
 function hapusAntrian(id) {
-  simpanJson(KUNCI_ANTRIAN_KAS, antrianKas().filter(x => x.id !== id));
+  simpanJson(kunciAntrianKas(), antrianKas().filter(x => x.id !== id));
 }
 
 function selisihKas(x) {
@@ -58,7 +74,7 @@ function hitungTotal() {
 }
 
 function muatCacheKas() {
-  const c = bacaJson(KUNCI_CACHE_KAS, {});
+  const c = bacaJson(kunciCacheKas(), {});
   saldoServer = Number(c.saldo) || 0;
   kasList = Array.isArray(c.log) ? c.log : [];
   hitungTotal();
@@ -66,7 +82,7 @@ function muatCacheKas() {
 
 function hapusCacheKas() {
   try {
-    localStorage.removeItem(KUNCI_CACHE_KAS);
+    localStorage.removeItem(kunciCacheKas());
   } catch (e) {}
   saldoServer = 0;
   kasList = [];
@@ -81,9 +97,9 @@ function terapkanKas(v) {
   kasIds = {};
   arr.forEach(x => { kasIds[x.id] = 1; });
   kasList = arr.sort(urutKas);
-  simpanJson(KUNCI_CACHE_KAS, { saldo: saldoServer, log: kasList.slice(0, BATAS_BARIS_KAS) });
+  simpanJson(kunciCacheKas(), { saldo: saldoServer, log: kasList.slice(0, BATAS_BARIS_KAS) });
   const sisa = antrianKas().filter(x => !kasIds[x.id]);
-  if (sisa.length !== antrianKas().length) simpanJson(KUNCI_ANTRIAN_KAS, sisa);
+  if (sisa.length !== antrianKas().length) simpanJson(kunciAntrianKas(), sisa);
   hitungTotal();
 }
 
@@ -109,7 +125,7 @@ function sinkronKas() {
   let ditolak = 0;
   let rantai = Promise.resolve();
   daftar.forEach(x => {
-    rantai = rantai.then(() => db.ref('kas/' + x.id).set(muatanKas(x)).then(() => {
+    rantai = rantai.then(() => db.ref(pathKas() + '/' + x.id).set(muatanKas(x)).then(() => {
       terkirim++;
       hapusAntrian(x.id);
     }).catch(e => {
@@ -320,15 +336,15 @@ function simpanKas() {
   }
   hentikanSuara();
   const item = {
-    id: db.ref('kas').push().key,
+    id: db.ref(pathKas()).push().key,
     tgl,
     jenis,
     nominal,
     ket,
-    oleh: (S.profile && S.profile.nama) || S.pengaturan.namaPC || 'Admin PP',
+    oleh: (S.profile && S.profile.nama) || (isPUK() ? namaPUKSaya() : S.pengaturan.namaPC) || 'Admin PP',
     dibuat: Date.now()
   };
-  simpanJson(KUNCI_ANTRIAN_KAS, antrianKas().concat([item]));
+  simpanJson(kunciAntrianKas(), antrianKas().concat([item]));
   draftKas = { jenis, tgl: '', nominal: '', ket: '' };
   hitungTotal();
   S.lastTab = '';
@@ -423,7 +439,7 @@ function kartuSaldo() {
   const menunggu = antrianBelumMasuk().length;
   const saldo = saldoGabungan();
   return '<section class="kas-saldo' + (saldo < 0 ? ' minus' : '') + '">' +
-    '<span class="kas-saldo-label">Sisa Saldo Kas Digital PP</span>' +
+    '<span class="kas-saldo-label">Sisa Saldo Kas Digital ' + (isPUK() ? 'PUK' : 'PP') + '</span>' +
     '<b class="kas-saldo-nilai">' + esc(rp(saldo)) + '</b>' +
     (menunggu ? '<small class="kas-saldo-info">' + menunggu + ' transaksi menunggu sinkron</small>' : '') +
     '</section>';
@@ -467,6 +483,8 @@ function viewKasRiwayat() {
 const viewDasborAsli = VIEWS.dasbor;
 const viewCatatAsli = VIEWS.catat;
 const viewRiwayatAsli = VIEWS.kuitansi;
+const viewBerandaAsli = VIEWS.beranda;
+const viewLaporPukAsli = VIEWS.lapor;
 
 VIEWS.dasbor = () => kartuSaldo() + viewDasborAsli();
 
@@ -476,17 +494,84 @@ VIEWS.catat = () => sakelarSub(subCatat, 'pilihSubCatat', [['kuitansi', 'Kuitans
 VIEWS.kuitansi = () => sakelarSub(subRiwayat, 'pilihSubRiwayat', [['kuitansi', 'Kuitansi Iuran'], ['kas', 'Kas Digital']]) +
   (subRiwayat === 'kas' ? viewKasRiwayat() : viewRiwayatAsli());
 
+VIEWS.beranda = () => kartuSaldo() + viewBerandaAsli();
+
+VIEWS.lapor = () => sakelarSub(subCatat, 'pilihSubCatat', [['kuitansi', 'Lapor Iuran'], ['kas', 'Kas Masuk/Keluar']]) +
+  (subCatat === 'kas' ? viewKasForm() : viewLaporPukAsli());
+
+VIEWS.kas = () => viewLaporan() + viewKasRiwayat();
+
+function viewPengaturanPUK() {
+  if (!isPUK()) return '';
+  const c = S.pengaturanPuk || {};
+  const img = k => S.tmp[k] || c[k] || '';
+  const pv = k => '<img class="pv" id="pv_' + k + '" src="' + img(k) + '"' + (img(k) ? '' : ' hidden') + '>';
+  return '<section class="card"><h3>Identitas PUK & penandatangan laporan</h3>' +
+    '<p class="hint">Data ini dipakai pada kop dan tanda tangan laporan keuangan PUK.</p>' +
+    '<label>Nama PUK</label><input value="PUK ' + esc(namaPUKSaya()) + '" readonly>' +
+    '<label for="sAlamat">Alamat</label><input id="sAlamat" value="' + esc(c.alamat) + '">' +
+    '<label for="sKota">Kota (untuk tanggal laporan)</label><input id="sKota" value="' + esc(c.kota) + '">' +
+    '<label for="sKetua">Nama ketua</label><input id="sKetua" value="' + esc(c.ketua) + '">' +
+    '<label for="sSekretaris">Nama sekretaris</label><input id="sSekretaris" value="' + esc(c.sekretaris) + '">' +
+    '<label for="sBendahara">Nama bendahara</label><input id="sBendahara" value="' + esc(c.bendahara) + '">' +
+    '<label for="fStempel">Gambar stempel (PNG transparan disarankan)</label><input id="fStempel" type="file" accept="image/*" onchange="muatGambar(this,\'stempel\')">' + pv('stempel') +
+    '<label for="fTtdKetua">Gambar tanda tangan ketua</label><input id="fTtdKetua" type="file" accept="image/*" onchange="muatGambar(this,\'ttdKetua\')">' + pv('ttdKetua') +
+    '<label for="fTtdSekretaris">Gambar tanda tangan sekretaris</label><input id="fTtdSekretaris" type="file" accept="image/*" onchange="muatGambar(this,\'ttdSekretaris\')">' + pv('ttdSekretaris') +
+    '<label for="fTtd">Gambar tanda tangan bendahara</label><input id="fTtd" type="file" accept="image/*" onchange="muatGambar(this,\'ttd\')">' + pv('ttd') +
+    '<button class="btn" onclick="simpanPengaturanPUK()">Simpan</button></section>';
+}
+
+function simpanPengaturanPUK() {
+  if (!isPUK()) return toast('Akses ditolak');
+  const c = S.pengaturanPuk || {};
+  const data = {
+    alamat: $('sAlamat').value.trim().slice(0, 200),
+    kota: $('sKota').value.trim().slice(0, 60),
+    ketua: $('sKetua').value.trim().slice(0, 100),
+    sekretaris: $('sSekretaris').value.trim().slice(0, 100),
+    bendahara: $('sBendahara').value.trim().slice(0, 100),
+    jabatan: 'Bendahara',
+    stempel: S.tmp.stempel || c.stempel || '',
+    ttd: S.tmp.ttd || c.ttd || '',
+    ttdKetua: S.tmp.ttdKetua || c.ttdKetua || '',
+    ttdSekretaris: S.tmp.ttdSekretaris || c.ttdSekretaris || ''
+  };
+  jalankan(async () => {
+    await db.ref('pengaturanPuk/' + pidSaya()).set(data);
+    ['stempel', 'ttd', 'ttdKetua', 'ttdSekretaris'].forEach(k => { delete S.tmp[k]; });
+    return true;
+  }, 'Pengaturan disimpan');
+}
+
+VIEWS.setelan = viewPengaturanPUK;
+
+IKON_NAV.kas = '<rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M16 15h3"/><path d="M5 6l11-3 1.5 3"/>';
+IKON_NAV.setelan = '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>';
+
+TABS_PUK.length = 0;
+TABS_PUK.push(
+  ['beranda', 'Beranda', 'Beranda'],
+  ['kuitansiku', 'Kuitansi Saya', 'Kuitansi'],
+  ['lapor', 'Lapor & Catat Kas', 'Catat'],
+  ['kas', 'Laporan Kas', 'Kas'],
+  ['setelan', 'Pengaturan', 'Setelan']
+);
+
 INPUT_RUPIAH.push('kNominal');
 
 const attachAsli = attach;
 
 attach = function () {
   attachAsli();
-  if (!isPC()) {
+  if (!isPC() && !isPUK()) {
     hapusCacheKas();
     return;
   }
-  const ref = db.ref('kas');
+  if (isPUK()) {
+    muatCacheKas();
+    listen('pengaturanPuk/' + pidSaya(), v => { S.pengaturanPuk = v || {}; });
+  }
+  const ref = db.ref(pathKas());
   ref.on('value', snap => {
     terapkanKas(snap.val());
     render();
@@ -503,11 +588,14 @@ const resetDataAsli = resetData;
 
 resetData = function () {
   resetDataAsli();
+  S.pengaturanPuk = {};
   hentikanSuara();
   kasIds = {};
   muatCacheKas();
 };
 
 window.addEventListener('online', sinkronKas);
+
+S.pengaturanPuk = S.pengaturanPuk || {};
 
 muatCacheKas();
