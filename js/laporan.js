@@ -1,5 +1,13 @@
 let lapBulan = '';
 
+function pengLaporan() {
+  return (isPUK() ? S.pengaturanPuk : S.pengaturan) || {};
+}
+
+function namaLembaga() {
+  return isPUK() ? 'PUK ' + namaPUKSaya() : ((S.pengaturan && S.pengaturan.namaPC) || 'PP FSP RTMM-SPSI');
+}
+
 const TGL_VALID = /^\d{4}-\d{2}-\d{2}$/;
 
 function entriLaporan() {
@@ -12,12 +20,15 @@ function entriLaporan() {
       keluar: x.jenis === 'keluar' ? Number(x.nominal) || 0 : 0,
       urut: Number(x.dibuat) || 0
     }));
+  const sebagaiPUK = isPUK();
   const iuran = daftarRiwayat()
     .map(i => ({
       tgl: i.tanggalSetor || tglCetak(i),
-      ket: 'Iuran COS PUK ' + ((S.puk[i.pid] || {}).namaPerusahaan || '-') + ' periode ' + labelPeriode(i.key),
-      masuk: Number(i.total) || 0,
-      keluar: 0,
+      ket: sebagaiPUK
+        ? 'Iuran COS periode ' + labelPeriode(i.key) + ' ke PP'
+        : 'Iuran COS PUK ' + ((S.puk[i.pid] || {}).namaPerusahaan || '-') + ' periode ' + labelPeriode(i.key),
+      masuk: sebagaiPUK ? 0 : Number(i.total) || 0,
+      keluar: sebagaiPUK ? Number(i.total) || 0 : 0,
       urut: Number(i.dibuat) || 0
     }))
     .filter(x => TGL_VALID.test(x.tgl));
@@ -124,13 +135,39 @@ function tandaTanganLaporan(d, y, key, c) {
   });
 }
 
+function kopLaporanPDF(d) {
+  if (!isPUK()) {
+    d.addImage(KOP_PP.src, KOP_PP.tipe, 15, 10, 180, 180 * KOP_PP.rasio);
+    return;
+  }
+  const c = pengLaporan();
+  d.setTextColor(26, 26, 26);
+  d.setFont('helvetica', 'bold');
+  d.setFontSize(16);
+  d.text(namaLembaga().toUpperCase(), 105, 21, { align: 'center', maxWidth: 180 });
+  let y = 27;
+  if (c.alamat) {
+    d.setFont('helvetica', 'normal');
+    d.setFontSize(9.5);
+    d.setTextColor(60, 60, 60);
+    const baris = d.splitTextToSize(c.alamat, 170).slice(0, 2);
+    d.text(baris, 105, y, { align: 'center' });
+    y += baris.length * 4.4;
+  }
+  d.setDrawColor(26, 26, 26);
+  d.setLineWidth(0.8);
+  d.line(15, y + 1.5, 195, y + 1.5);
+  d.setLineWidth(0.2);
+  d.line(15, y + 3, 195, y + 3);
+}
+
 function buatLaporanPDF(d, key) {
-  const c = S.pengaturan || {};
+  const c = pengLaporan();
   const r = rekapBulan(entriLaporan(), key);
   const W = 210;
   const tengah = W / 2;
 
-  d.addImage(KOP_PP.src, KOP_PP.tipe, 15, 10, 180, 180 * KOP_PP.rasio);
+  kopLaporanPDF(d);
 
   d.setTextColor(26, 26, 26);
   d.setFont('helvetica', 'bold');
@@ -188,7 +225,7 @@ function namaBerkasLaporan(key, ext) {
 
 function teksBagikanLaporan(key) {
   const r = rekapBulan(entriLaporan(), key);
-  return 'Laporan keuangan ' + ((S.pengaturan && S.pengaturan.namaPC) || 'PP') + '\nPeriode ' + labelPeriode(key) + '\nSaldo akhir: ' + rp(r.akhir);
+  return 'Laporan keuangan ' + namaLembaga() + '\nPeriode ' + labelPeriode(key) + '\nSaldo akhir: ' + rp(r.akhir);
 }
 
 function buatDokumenLaporan(key) {
@@ -215,6 +252,9 @@ const GAYA_LAPORAN = `
 .pv-stage.lap{align-items:flex-start}
 .lap-kertas{position:absolute;left:0;top:0;width:794px;box-sizing:border-box;padding:57px;background:#fff;color:#1a1a1a;font-family:Helvetica,Arial,sans-serif;transform-origin:0 0}
 .lap-kopgbr{display:block;width:100%;height:auto;margin-bottom:18px}
+.lap-kopteks{margin-bottom:22px;padding-bottom:10px;text-align:center;border-bottom:3px double #1a1a1a}
+.lap-kopteks b{display:block;font-size:22px;letter-spacing:.3px;text-transform:uppercase}
+.lap-kopteks span{display:block;margin-top:5px;font-size:12px;color:#3c3c3c}
 .lap-judul{font-size:17px;font-weight:700;text-align:center}
 .lap-periode{margin-top:4px;font-size:12.5px;color:#555;text-align:center}
 .lap-awal{margin:18px 0 8px;font-size:13px;font-weight:700}
@@ -241,8 +281,14 @@ function pasangGayaLaporan() {
   document.head.appendChild(el);
 }
 
+function htmlKopLaporan() {
+  if (!isPUK()) return '<img class="lap-kopgbr" alt="" src="' + KOP_PP.src + '">';
+  const c = pengLaporan();
+  return '<div class="lap-kopteks"><b>' + esc(namaLembaga()) + '</b>' + (c.alamat ? '<span>' + esc(c.alamat) + '</span>' : '') + '</div>';
+}
+
 function htmlLaporan(key) {
-  const c = S.pengaturan || {};
+  const c = pengLaporan();
   const r = rekapBulan(entriLaporan(), key);
   const tglTtd = [c.kota, fmtTgl(akhirBulan(key))].filter(Boolean).join(', ');
   const baris = r.baris.map(x =>
@@ -253,7 +299,7 @@ function htmlLaporan(key) {
   const gambar = (src, kelas) => (src ? '<img class="' + kelas + '" alt="" src="' + src + '">' : '');
   const nama = v => '<div class="lap-nama"><span>' + esc(v || '') + '</span></div>';
   return '<div class="lap-kertas" id="lapKertas">' +
-    '<img class="lap-kopgbr" alt="" src="' + KOP_PP.src + '">' +
+    htmlKopLaporan() +
     '<div class="lap-judul">LAPORAN KEUANGAN</div><div class="lap-periode">Periode ' + esc(labelPeriode(key)) + '</div>' +
     '<div class="lap-awal">Saldo Awal Bulan Ini: ' + esc(rp(r.awal)) + '</div>' +
     '<table class="lap-tabel"><colgroup><col style="width:83px"><col><col style="width:113px"><col style="width:113px"><col style="width:113px"></colgroup>' +
@@ -366,7 +412,7 @@ function kirimLaporanWA(tombol) {
     const berkas = new File([blob], namaBerkasLaporan(key, 'pdf'), { type: 'application/pdf' });
     if (navigator.canShare && navigator.canShare({ files: [berkas] })) {
       try {
-        await navigator.share({ files: [berkas], title: 'Laporan Keuangan PP', text: teks });
+        await navigator.share({ files: [berkas], title: 'Laporan Keuangan ' + namaLembaga(), text: teks });
         return;
       } catch (e) {
         if (e && e.name === 'AbortError') return;
@@ -444,7 +490,7 @@ function tutupLembar(ws, barisAkhir, lebar) {
 let gayaLembar = null;
 
 function kopLembar(ws, c, subjudul) {
-  selGabung(ws, 0, 0, 4, (c.namaPC || 'PP FSP RTMM-SPSI').toUpperCase(), gayaLembar.judul);
+  selGabung(ws, 0, 0, 4, namaLembaga().toUpperCase(), gayaLembar.judul);
   selGabung(ws, 1, 0, 4, c.alamat || '', gayaLembar.sub);
   selGabung(ws, 2, 0, 4, 'LAPORAN KEUANGAN', gayaLembar.judulLaporan);
   selGabung(ws, 3, 0, 4, subjudul, gayaLembar.sub);
@@ -525,7 +571,7 @@ async function eksporLaporanXLSX() {
   if (!daftar.length) return toast('Belum ada transaksi untuk diekspor');
   await jalankan(async () => {
     await muatXLSX();
-    const c = S.pengaturan || {};
+    const c = pengLaporan();
     gayaLembar = gayaXLSX();
     const buku = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(buku, lembarRingkasan(entri, daftar, c), 'Ringkasan');
