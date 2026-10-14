@@ -79,6 +79,64 @@ const TABS_PUK = [
 
 const TAB_UTAMA = ['catat', 'lapor'];
 
+const GAYA_DESKTOP = `
+@media (min-width:700px){
+  nav{max-width:660px}
+  .pwa-bar{max-width:660px}
+}
+@media (min-width:820px){
+  main{max-width:1180px;padding:28px 28px 150px}
+  main#content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:22px;align-items:start}
+  main#content>*{grid-column:1/-1;min-width:0}
+  main#content:has(.card ~ .card)>.card,main#content:has(.card ~ .card)~*{grid-column:auto}
+  main#content>.card:only-of-type,main#content:not(:has(.card ~ .card))>.card{max-width:820px}
+  .rk{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}
+  .rk>.rk-judul{grid-column:1/-1;max-width:none;margin:4px 2px 0}
+  .rk>.rk-item,.rk>.rk-wa{max-width:none;margin:0}
+  .sub-tab{max-width:460px}
+  .puk-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:1px;background:#e6ebf2}
+  .puk-baris{background:#fff;border-top:0}
+  .kpi-panel{margin-bottom:26px}
+  .kpi{padding:20px 24px}
+  .kpi-nilai{font-size:34px}
+  .kas-saldo{padding:20px 26px}
+  .card .btn{width:auto;min-width:240px}
+  .card .btn.alt{min-width:0}
+}
+@media (min-width:1000px){
+  header{position:sticky;top:0;z-index:12;height:76px;padding:0 28px}
+  header b{font-size:19px}
+  nav{top:76px;left:0;right:auto;bottom:0;width:244px;max-width:none;margin:0;padding:18px 14px;flex-direction:column;justify-content:flex-start;gap:6px;overflow-y:auto;background:#fff;border:0;border-right:1px solid #dce5ef;border-radius:0;box-shadow:none}
+  nav button,nav button.utama{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:14px;min-height:50px;padding:0 16px;border-radius:12px;font-size:15px;font-weight:600;letter-spacing:0;text-align:left;color:#475569;transition:background .15s ease,color .15s ease}
+  nav button:hover:not(.on){background:#eef4fb;color:#0756a3}
+  nav button.on,nav button.utama.on{background:#0756a3;color:#fff}
+  nav button .nav-label{display:none}
+  nav button::after{content:attr(aria-label);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  nav button.utama{margin:4px 0;font-weight:700;color:#0756a3;background:#eaf3fd;box-shadow:inset 0 0 0 1px #cfe2f7}
+  nav button.utama:hover:not(.on){background:#dcebfb;color:#063e78}
+  nav button.utama.on{color:#fff;background:#0756a3;box-shadow:none}
+  nav button.utama .nav-ikon,nav button.utama.on .nav-ikon{width:26px;height:26px;margin:0;border:0;background:none;box-shadow:none;color:inherit}
+  nav button.utama svg{width:26px;height:26px;stroke-width:2.4}
+  main{margin:0 0 0 244px;max-width:none;padding:30px max(32px,calc((100vw - 244px - 1240px)/2)) 56px}
+  #toast{bottom:28px}
+  body:has(#appView:not([hidden])) #toast{bottom:28px}
+  body:has(#appView:not([hidden])) .pwa-bar{left:auto;right:20px;bottom:20px;margin:0}
+  .rk-aksi button:hover,.sub-tab button:not(.on):hover,.kas-jenis button:hover{background:#eaf1fa}
+  .rk-aksi button,.sub-tab button,.kas-jenis button,.btn{transition:background .15s ease}
+}
+@media (min-width:1500px){
+  main{padding-left:max(40px,calc((100vw - 244px - 1380px)/2));padding-right:max(40px,calc((100vw - 244px - 1380px)/2))}
+  .rk{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
+}
+`;
+
+function pasangGayaDesktop() {
+  const el = document.createElement('style');
+  el.id = 'gayaDesktop';
+  el.textContent = GAYA_DESKTOP;
+  document.head.appendChild(el);
+}
+
 function tabsAktif() {
   return isPUK() ? TABS_PUK : TABS_PC;
 }
@@ -183,6 +241,7 @@ document.addEventListener('input', e => {
 });
 
 pasangGayaLansia();
+pasangGayaDesktop();
 
 function pasangKetukRahasia() {
   const el = $('who');
