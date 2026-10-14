@@ -273,11 +273,16 @@ function sakelarSub(aktif, fungsi, pilihan) {
   ).join('') + '</div>';
 }
 
+function saldoGabungan() {
+  return entriLaporan().reduce((t, x) => t + x.masuk - x.keluar, 0);
+}
+
 function kartuSaldo() {
   const menunggu = antrianBelumMasuk().length;
-  return '<section class="kas-saldo' + (totalSaldo < 0 ? ' minus' : '') + '">' +
+  const saldo = saldoGabungan();
+  return '<section class="kas-saldo' + (saldo < 0 ? ' minus' : '') + '">' +
     '<span class="kas-saldo-label">Sisa Saldo Kas Digital PP</span>' +
-    '<b class="kas-saldo-nilai">' + esc(rp(totalSaldo)) + '</b>' +
+    '<b class="kas-saldo-nilai">' + esc(rp(saldo)) + '</b>' +
     (menunggu ? '<small class="kas-saldo-info">' + menunggu + ' transaksi menunggu sinkron</small>' : '') +
     '</section>';
 }
@@ -312,12 +317,7 @@ function viewKasRiwayat() {
   if (!baris.length) {
     return '<section class="card"><h2>Riwayat Kas Digital</h2><p class="kas-kosong">Belum ada transaksi kas.</p></section>';
   }
-  const masuk = baris.filter(x => x.jenis !== 'keluar').reduce((t, x) => t + (Number(x.nominal) || 0), 0);
-  const keluar = baris.filter(x => x.jenis === 'keluar').reduce((t, x) => t + (Number(x.nominal) || 0), 0);
-  return '<section class="card"><h2>Riwayat Kas Digital</h2>' +
-    '<div class="kas-ringkas"><div><span>Total Masuk</span><b class="kas-masuk">' + esc(rp(masuk)) + '</b></div>' +
-    '<div><span>Total Keluar</span><b class="kas-keluar">' + esc(rp(keluar)) + '</b></div>' +
-    '<div><span>Saldo</span><b>' + esc(rp(masuk - keluar)) + '</b></div></div></section>' +
+  return '<section class="card"><h2>Riwayat Kas Digital</h2></section>' +
     baris.slice(0, BATAS_KARTU_KAS).map(kartuKas).join('') +
     (baris.length > BATAS_KARTU_KAS ? '<p class="kas-kosong">Menampilkan ' + BATAS_KARTU_KAS + ' transaksi terbaru.</p>' : '');
 }
