@@ -461,13 +461,28 @@ function viewKasForm() {
     '<button class="btn" onclick="simpanKas()">Simpan Transaksi</button></section>';
 }
 
+const GAYA_RIWAYAT_KAS = `
+.kas-daftar{margin-top:10px}
+.kas-baris{padding:12px 0;border-top:1px solid var(--line)}
+.kas-baris:last-child{padding-bottom:2px}
+.kas-baris .rk-info{margin-top:4px}
+`;
+
+function pasangGayaRiwayatKas() {
+  if ($('gayaRiwayatKas')) return;
+  const el = document.createElement('style');
+  el.id = 'gayaRiwayatKas';
+  el.textContent = GAYA_RIWAYAT_KAS;
+  document.head.appendChild(el);
+}
+
 function kartuKas(x) {
   const masuk = x.jenis !== 'keluar';
-  return '<article class="rk-item">' +
+  return '<div class="kas-baris">' +
     '<div class="rk-nama">' + esc(x.ket) + (x.menunggu ? ' <span class="kas-tunggu">menunggu sinkron</span>' : '') + '</div>' +
     '<div class="rk-info"><span class="rk-periode">' + (masuk ? 'Kas Masuk' : 'Kas Keluar') + ' · ' + esc(fmtTgl(x.tgl)) + '</span>' +
     '<span class="rk-nominal ' + (masuk ? 'kas-masuk' : 'kas-keluar') + '">' + (masuk ? '' : '-') + esc(rp(x.nominal)) + '</span></div>' +
-    '</article>';
+    '</div>';
 }
 
 function viewKasRiwayat() {
@@ -475,9 +490,10 @@ function viewKasRiwayat() {
   if (!baris.length) {
     return '<section class="card"><h2>Riwayat Kas Digital</h2><p class="kas-kosong">Belum ada transaksi kas.</p></section>';
   }
-  return '<section class="card"><h2>Riwayat Kas Digital</h2></section>' +
-    baris.slice(0, BATAS_KARTU_KAS).map(kartuKas).join('') +
-    (baris.length > BATAS_KARTU_KAS ? '<p class="kas-kosong">Menampilkan ' + BATAS_KARTU_KAS + ' transaksi terbaru.</p>' : '');
+  pasangGayaRiwayatKas();
+  return '<section class="card"><h2>Riwayat Kas Digital</h2><div class="kas-daftar">' +
+    baris.slice(0, BATAS_KARTU_KAS).map(kartuKas).join('') + '</div>' +
+    (baris.length > BATAS_KARTU_KAS ? '<p class="kas-kosong">Menampilkan ' + BATAS_KARTU_KAS + ' transaksi terbaru.</p>' : '') + '</section>';
 }
 
 const viewDasborAsli = VIEWS.dasbor;
@@ -518,7 +534,7 @@ function viewPengaturanPUK() {
     '<label for="fTtdKetua">Gambar tanda tangan ketua</label><input id="fTtdKetua" type="file" accept="image/*" onchange="muatGambar(this,\'ttdKetua\')">' + pv('ttdKetua') +
     '<label for="fTtdSekretaris">Gambar tanda tangan sekretaris</label><input id="fTtdSekretaris" type="file" accept="image/*" onchange="muatGambar(this,\'ttdSekretaris\')">' + pv('ttdSekretaris') +
     '<label for="fTtd">Gambar tanda tangan bendahara</label><input id="fTtd" type="file" accept="image/*" onchange="muatGambar(this,\'ttd\')">' + pv('ttd') +
-    '<button class="btn" onclick="simpanPengaturanPUK()">Simpan</button></section>';
+    '<button class="btn" onclick="simpanPengaturanPUK()">Simpan</button></section>' + kartuGantiSandi();
 }
 
 function simpanPengaturanPUK() {
@@ -599,3 +615,4 @@ window.addEventListener('online', sinkronKas);
 S.pengaturanPuk = S.pengaturanPuk || {};
 
 muatCacheKas();
+
