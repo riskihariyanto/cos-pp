@@ -69,8 +69,11 @@ function viewPukBeranda() {
     '<div class="puk-baris ' + (lunas ? 'lunas' : 'belum') + '"><b class="puk-nama">PUK ' + esc(namaPUKSaya()) + '</b>' + status + '</div>' +
     (lunas ? '' : '<button class="btn" onclick="showTab(\'lapor\')">Lapor Pembayaran</button>') + '</section>' +
     '<section class="rk"><h3 class="rk-judul">Laporan Saya (' + daftar.length + ')</h3>' +
-    (riwayat || '<p class="hint">Belum ada laporan pembayaran.</p>') + '</section>' +
-    '<section class="card"><h3>Ganti Kata Sandi</h3>' +
+    (riwayat || '<p class="hint">Belum ada laporan pembayaran.</p>') + '</section>';
+}
+
+function kartuGantiSandi() {
+  return '<section class="card"><h3>Ganti Kata Sandi</h3>' +
     '<label for="pSandiLama">Kata sandi lama</label><input id="pSandiLama" type="password" autocomplete="current-password">' +
     '<label for="pSandiBaru">Kata sandi baru (minimal 6 karakter)</label><input id="pSandiBaru" type="password" autocomplete="new-password">' +
     '<button class="btn alt" onclick="gantiSandiSaya()">Ganti Kata Sandi</button></section>';
