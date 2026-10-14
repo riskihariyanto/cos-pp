@@ -84,7 +84,7 @@ function daftarPilihanPUK() {
     out.push({ nilai: pid || 'awal:' + n, nama: pid ? S.puk[pid].namaPerusahaan : n });
   });
   sortedPUK().forEach(pid => {
-    if (!terpakai[pid] && jumlahKuitansiPUK(pid) > 0) out.push({ nilai: pid, nama: S.puk[pid].namaPerusahaan });
+    if (!terpakai[pid]) out.push({ nilai: pid, nama: S.puk[pid].namaPerusahaan });
   });
   return out;
 }
