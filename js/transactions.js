@@ -165,6 +165,48 @@ function pilihSubRiwayat(k) {
   render();
 }
 
+const GAYA_BERHASIL = `
+#ovBerhasil{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.55);animation:bhMasuk .2s ease-out}
+#ovBerhasil.bh-keluar{opacity:0;transition:opacity .25s ease}
+#ovBerhasil .bh-kotak{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:240px;max-width:86%;padding:28px 26px 24px;border-radius:20px;background:#fff;text-align:center;box-shadow:0 18px 48px rgba(0,0,0,.3);animation:bhKotak .35s cubic-bezier(.2,1.3,.4,1)}
+#ovBerhasil .bh-kotak b{font-size:22px;color:#14532d}
+#ovBerhasil .bh-kotak span{font-size:16px;color:#1a1a1a;word-break:break-word}
+#ovBerhasil .bh-ikon{width:84px;height:84px;margin-bottom:4px}
+#ovBerhasil .bh-lingkar{fill:#dcfce7;stroke:#16a34a;stroke-width:3;stroke-dasharray:1;stroke-dashoffset:1;animation:bhGaris .5s ease-out .05s forwards}
+#ovBerhasil .bh-centang{fill:none;stroke:#16a34a;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:bhGaris .35s ease-out .45s forwards}
+@keyframes bhGaris{to{stroke-dashoffset:0}}
+@keyframes bhMasuk{from{opacity:0}to{opacity:1}}
+@keyframes bhKotak{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){#ovBerhasil,#ovBerhasil *{animation-duration:.01s!important;animation-delay:0s!important}}
+`;
+
+function pasangGayaBerhasil() {
+  if ($('gayaBerhasil')) return;
+  const el = document.createElement('style');
+  el.id = 'gayaBerhasil';
+  el.textContent = GAYA_BERHASIL;
+  document.head.appendChild(el);
+}
+
+function animasiBerhasil(judul, rincian) {
+  pasangGayaBerhasil();
+  const lama = $('ovBerhasil');
+  if (lama) lama.remove();
+  const ov = document.createElement('div');
+  ov.id = 'ovBerhasil';
+  ov.setAttribute('role', 'status');
+  ov.setAttribute('aria-live', 'polite');
+  ov.innerHTML = '<div class="bh-kotak"><svg class="bh-ikon" viewBox="0 0 52 52" aria-hidden="true">' +
+    '<circle class="bh-lingkar" cx="26" cy="26" r="23" pathLength="1"/>' +
+    '<path class="bh-centang" d="M15 27l8 8 14-16" pathLength="1"/></svg>' +
+    '<b>' + esc(judul) + '</b>' + (rincian ? '<span>' + esc(rincian) + '</span>' : '') + '</div>';
+  document.body.appendChild(ov);
+  setTimeout(() => {
+    ov.classList.add('bh-keluar');
+    setTimeout(() => ov.remove(), 260);
+  }, 1500);
+}
+
 function simpanKas() {
   simpanDraftKas();
   const jenis = draftKas.jenis === 'keluar' ? 'keluar' : 'masuk';
@@ -198,9 +240,12 @@ function simpanKas() {
     dibuat: Date.now()
   };
   simpanJson(KUNCI_ANTRIAN_KAS, antrianKas().concat([item]));
+  const rincian = (jenis === 'keluar' ? 'Kas Keluar ' : 'Kas Masuk ') + rp(nominal) + ' · ' + ket;
   draftKas = { jenis, tgl: '', nominal: '', ket: '' };
   hitungTotal();
+  S.lastTab = '';
   render();
+  animasiBerhasil('Transaksi Tersimpan', rincian);
   if (!navigator.onLine) {
     toast('Offline · transaksi disimpan di HP dan disinkron otomatis');
     return;
