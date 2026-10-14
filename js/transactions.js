@@ -166,18 +166,39 @@ function pilihSubRiwayat(k) {
 }
 
 const GAYA_BERHASIL = `
-#ovBerhasil{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.55);animation:bhMasuk .2s ease-out}
-#ovBerhasil.bh-keluar{opacity:0;transition:opacity .25s ease}
-#ovBerhasil .bh-kotak{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:240px;max-width:86%;padding:28px 26px 24px;border-radius:20px;background:#fff;text-align:center;box-shadow:0 18px 48px rgba(0,0,0,.3);animation:bhKotak .35s cubic-bezier(.2,1.3,.4,1)}
-#ovBerhasil .bh-kotak b{font-size:22px;color:#14532d}
-#ovBerhasil .bh-kotak span{font-size:16px;color:#1a1a1a;word-break:break-word}
-#ovBerhasil .bh-ikon{width:84px;height:84px;margin-bottom:4px}
-#ovBerhasil .bh-lingkar{fill:#dcfce7;stroke:#16a34a;stroke-width:3;stroke-dasharray:1;stroke-dashoffset:1;animation:bhGaris .5s ease-out .05s forwards}
-#ovBerhasil .bh-centang{fill:none;stroke:#16a34a;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:bhGaris .35s ease-out .45s forwards}
+#ovBerhasil{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,20,40,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:bhFade .25s ease-out}
+#ovBerhasil.bh-keluar{opacity:0;transition:opacity .28s ease}
+#ovBerhasil .bh-kartu{position:relative;width:100%;max-width:360px;overflow:hidden;border-radius:24px;background:#fff;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.38);animation:bhKartu .55s cubic-bezier(.18,1.15,.4,1)}
+#ovBerhasil .bh-kepala{position:relative;padding:34px 20px 24px;background:linear-gradient(160deg,#0a63b8 0%,#003f7d 100%);border-bottom:4px solid var(--gold,#fdb913);overflow:hidden}
+#ovBerhasil .bh-lencana{position:relative;width:96px;height:96px;margin:0 auto 14px}
+#ovBerhasil .bh-cincin{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,255,255,.55);opacity:0;animation:bhCincin 1.4s ease-out .35s 2}
+#ovBerhasil .bh-cincin.dua{animation-delay:.75s}
+#ovBerhasil .bh-ikon{position:relative;width:96px;height:96px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.3))}
+#ovBerhasil .bh-bulat{transform-origin:50% 50%;animation:bhPop .5s cubic-bezier(.2,1.4,.4,1) .1s both}
+#ovBerhasil .bh-centang{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:bhGaris .4s ease-out .5s forwards}
+#ovBerhasil .bh-judul{margin:0;color:#fff;font-size:22px;font-weight:800;letter-spacing:.2px;animation:bhNaik .45s ease-out .55s both}
+#ovBerhasil .bh-serpih{position:absolute;left:50%;top:78px;width:8px;height:8px;opacity:0;animation:bhSerpih 1.15s cubic-bezier(.1,.7,.3,1) forwards}
+#ovBerhasil .bh-badan{padding:20px 20px 22px}
+#ovBerhasil .bh-label{display:block;font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#3d3d3d;animation:bhNaik .45s ease-out .7s both}
+#ovBerhasil .bh-nominal{display:block;margin:2px 0 14px;font-size:36px;font-weight:800;line-height:1.15;color:var(--pri,#0055a5);font-variant-numeric:tabular-nums;animation:bhNaik .45s ease-out .75s both}
+#ovBerhasil .bh-baris{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:10px 0;border-top:1px dashed #c5d0de;text-align:left;font-size:15px;animation:bhNaik .45s ease-out both}
+#ovBerhasil .bh-baris span{flex:0 0 auto;color:#3d3d3d}
+#ovBerhasil .bh-baris b{flex:1 1 auto;text-align:right;color:#1a1a1a;word-break:break-word}
+#ovBerhasil .bh-tutup{width:100%;min-height:52px;margin-top:14px;border:0;border-radius:12px;background:var(--pri,#0055a5);color:#fff;font:inherit;font-size:18px;font-weight:700;cursor:pointer;transition:opacity .2s ease}
+#ovBerhasil .bh-tutup:disabled{opacity:.45;cursor:default}
+#ovBerhasil .bh-waktu{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--gold,#fdb913);transform-origin:left center;animation:bhWaktu 3.8s linear forwards}
+@keyframes bhFade{from{opacity:0}to{opacity:1}}
+@keyframes bhKartu{from{opacity:0;transform:translateY(40px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes bhPop{from{transform:scale(0)}to{transform:scale(1)}}
 @keyframes bhGaris{to{stroke-dashoffset:0}}
-@keyframes bhMasuk{from{opacity:0}to{opacity:1}}
-@keyframes bhKotak{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
-@media (prefers-reduced-motion:reduce){#ovBerhasil,#ovBerhasil *{animation-duration:.01s!important;animation-delay:0s!important}}
+@keyframes bhCincin{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(2.1)}}
+@keyframes bhNaik{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes bhSerpih{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r))}}
+@keyframes bhWaktu{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media (prefers-reduced-motion:reduce){
+  #ovBerhasil .bh-serpih,#ovBerhasil .bh-cincin{display:none}
+  #ovBerhasil,#ovBerhasil *{animation-duration:.01s!important;animation-delay:0s!important}
+}
 `;
 
 function pasangGayaBerhasil() {
@@ -188,23 +209,91 @@ function pasangGayaBerhasil() {
   document.head.appendChild(el);
 }
 
-function animasiBerhasil(judul, rincian) {
+function serpihBerhasil() {
+  const warna = ['#fdb913', '#ffffff', '#4ade80', '#7fb4ee', '#e31e24'];
+  let out = '';
+  for (let i = 0; i < 18; i++) {
+    const sudut = (i / 18) * Math.PI * 2 + Math.random() * 0.4;
+    const jarak = 90 + Math.random() * 70;
+    const ukuran = 6 + Math.random() * 5;
+    out += '<i class="bh-serpih" style="--dx:' + Math.round(Math.cos(sudut) * jarak) + 'px;--dy:' + Math.round(Math.sin(sudut) * jarak - 20) +
+      'px;--r:' + Math.round(Math.random() * 540 - 270) + 'deg;width:' + ukuran.toFixed(1) + 'px;height:' + (ukuran * (Math.random() > 0.5 ? 1 : 0.5)).toFixed(1) +
+      'px;border-radius:' + (Math.random() > 0.5 ? '50%' : '2px') + ';background:' + warna[i % warna.length] +
+      ';animation-delay:' + (0.4 + Math.random() * 0.15).toFixed(2) + 's"></i>';
+  }
+  return out;
+}
+
+function animasiBerhasil(o) {
+  const opsi = o || {};
   pasangGayaBerhasil();
   const lama = $('ovBerhasil');
-  if (lama) lama.remove();
+  if (lama && lama.tutupBerhasil) lama.tutupBerhasil(true);
+  const kurang = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const baris = (opsi.baris || []).filter(x => x && x[1] != null && x[1] !== '');
+  const punyaNominal = opsi.nominal != null;
   const ov = document.createElement('div');
   ov.id = 'ovBerhasil';
-  ov.setAttribute('role', 'status');
-  ov.setAttribute('aria-live', 'polite');
-  ov.innerHTML = '<div class="bh-kotak"><svg class="bh-ikon" viewBox="0 0 52 52" aria-hidden="true">' +
-    '<circle class="bh-lingkar" cx="26" cy="26" r="23" pathLength="1"/>' +
-    '<path class="bh-centang" d="M15 27l8 8 14-16" pathLength="1"/></svg>' +
-    '<b>' + esc(judul) + '</b>' + (rincian ? '<span>' + esc(rincian) + '</span>' : '') + '</div>';
+  ov.setAttribute('role', 'alertdialog');
+  ov.setAttribute('aria-live', 'assertive');
+  ov.setAttribute('aria-label', opsi.judul || 'Berhasil');
+  ov.innerHTML = '<div class="bh-kartu">' +
+    '<div class="bh-kepala">' + (kurang ? '' : serpihBerhasil()) +
+    '<div class="bh-lencana"><span class="bh-cincin"></span><span class="bh-cincin dua"></span>' +
+    '<svg class="bh-ikon" viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="bhGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#15803d"/></linearGradient></defs>' +
+    '<circle class="bh-bulat" cx="48" cy="48" r="44" fill="url(#bhGrad)"/>' +
+    '<path class="bh-centang" d="M28 50l14 14 27-30" pathLength="1"/></svg></div>' +
+    '<h2 class="bh-judul">' + esc(opsi.judul || 'Berhasil') + '</h2></div>' +
+    '<div class="bh-badan">' +
+    (punyaNominal ? '<span class="bh-label">' + esc(opsi.labelNominal || 'Nominal') + '</span><b class="bh-nominal" id="bhNominal">' + esc(kurang ? rp(opsi.nominal) : rp(0)) + '</b>' : '') +
+    baris.map((x, i) => '<div class="bh-baris" style="animation-delay:' + (0.85 + i * 0.08).toFixed(2) + 's"><span>' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b></div>').join('') +
+    '<button type="button" class="bh-tutup" disabled>Selesai</button></div>' +
+    '<div class="bh-waktu"></div></div>';
   document.body.appendChild(ov);
-  setTimeout(() => {
+
+  const tombol = ov.querySelector('.bh-tutup');
+  let siap = false;
+  let selesai = false;
+  let timerAuto = 0;
+  let rafId = 0;
+
+  function tutup(langsung) {
+    if (selesai) return;
+    selesai = true;
+    clearTimeout(timerAuto);
+    cancelAnimationFrame(rafId);
+    if (langsung) {
+      ov.remove();
+      return;
+    }
     ov.classList.add('bh-keluar');
-    setTimeout(() => ov.remove(), 260);
-  }, 1500);
+    setTimeout(() => ov.remove(), 300);
+  }
+
+  ov.tutupBerhasil = tutup;
+  tombol.addEventListener('click', () => { if (siap) tutup(); });
+  ov.addEventListener('click', e => { if (siap && e.target === ov) tutup(); });
+  setTimeout(() => {
+    siap = true;
+    tombol.disabled = false;
+  }, 900);
+  timerAuto = setTimeout(() => tutup(), 3800);
+
+  if (punyaNominal && !kurang) {
+    const target = Number(opsi.nominal) || 0;
+    const mulai = performance.now() + 450;
+    const langkah = t => {
+      const el = $('bhNominal');
+      if (!el) return;
+      const p = Math.min(1, Math.max(0, (t - mulai) / 750));
+      el.textContent = rp(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) rafId = requestAnimationFrame(langkah);
+    };
+    rafId = requestAnimationFrame(langkah);
+  }
+  try {
+    if (navigator.vibrate) navigator.vibrate([35, 40, 35]);
+  } catch (e) {}
 }
 
 function simpanKas() {
@@ -240,12 +329,20 @@ function simpanKas() {
     dibuat: Date.now()
   };
   simpanJson(KUNCI_ANTRIAN_KAS, antrianKas().concat([item]));
-  const rincian = (jenis === 'keluar' ? 'Kas Keluar ' : 'Kas Masuk ') + rp(nominal) + ' · ' + ket;
   draftKas = { jenis, tgl: '', nominal: '', ket: '' };
   hitungTotal();
   S.lastTab = '';
   render();
-  animasiBerhasil('Transaksi Tersimpan', rincian);
+  animasiBerhasil({
+    judul: 'Transaksi Tersimpan',
+    labelNominal: jenis === 'keluar' ? 'Kas Keluar' : 'Kas Masuk',
+    nominal,
+    baris: [
+      ['Keterangan', ket],
+      ['Tanggal', fmtTgl(tgl)],
+      ['Status', navigator.onLine ? 'Tercatat di kas digital' : 'Disimpan di HP, sinkron otomatis']
+    ]
+  });
   if (!navigator.onLine) {
     toast('Offline · transaksi disimpan di HP dan disinkron otomatis');
     return;
