@@ -106,25 +106,28 @@ function susunKuitansi(d, pid, key) {
   const susunBaris = (fs, tinggi, jeda) => {
     d.setFont('helvetica', 'bold');
     d.setFontSize(fs);
-    let y = 54;
+    let y = 0;
     const hasil = isi.map(([label, nilai]) => {
       const lines = d.splitTextToSize(nilai, W - 16 - 59);
       const r = { label, lines, y };
       y += Math.max(1, lines.length) * tinggi + jeda;
       return r;
     });
-    return { hasil, akhir: y - jeda };
+    const rentang = y - jeda - tinggi;
+    const geser = Math.min(Math.max(70 - rentang / 2 + 1.2, 55), 89 - rentang);
+    hasil.forEach(r => { r.y += geser; });
+    return { hasil, rentang };
   };
-  const BATAS_ISI = 90;
+  const RENTANG_MAKS = 33;
   let fs = 10;
-  let susunan = susunBaris(fs, 4.6, 3.2);
-  if (susunan.akhir > BATAS_ISI) {
+  let susunan = susunBaris(fs, 4.2, 1.7);
+  if (susunan.rentang > RENTANG_MAKS) {
     fs = 9;
-    susunan = susunBaris(fs, 4.1, 2.2);
+    susunan = susunBaris(fs, 3.8, 1.4);
   }
-  if (susunan.akhir > BATAS_ISI) {
+  if (susunan.rentang > RENTANG_MAKS) {
     fs = 8;
-    susunan = susunBaris(fs, 3.6, 1.6);
+    susunan = susunBaris(fs, 3.4, 1.1);
   }
   const baris = susunan.hasil;
 
@@ -576,4 +579,4 @@ function kirimPDFWA(tombol, pid, key) {
     toast('PDF tersimpan. Lampirkan di WhatsApp.');
     setTimeout(() => { window.open('https://wa.me/?text=' + encodeURIComponent(teks), '_blank'); }, 700);
   });
-}
+    }
