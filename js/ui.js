@@ -1,4 +1,4 @@
-const INPUT_RUPIAH = ['fTotal', 'lTotal'];
+const INPUT_RUPIAH = ['fTotal'];
 const NOMOR_BANTUAN = '6281383179209';
 
 const GAYA_LANSIA = `
@@ -44,145 +44,20 @@ const VIEWS = {
   dasbor: viewDasbor,
   catat: viewCatat,
   kuitansi: viewRiwayatKuitansi,
-  laporan: viewLaporanMasuk,
-  akun: viewAkunPUK,
-  beranda: viewPukBeranda,
-  lapor: viewPukLapor,
-  kuitansiku: viewPukKuitansi,
   pengaturan: viewPengaturan
 };
 
 const IKON_NAV = {
   dasbor: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   catat: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-  kuitansi: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
-  laporan: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
-  akun: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-  beranda: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/>'
+  kuitansi: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'
 };
-IKON_NAV.kuitansiku = IKON_NAV.kuitansi;
-IKON_NAV.lapor = IKON_NAV.catat;
 
 const TABS_PC = [
   ['dasbor', 'Status Pembayaran', 'Status'],
-  ['laporan', 'Laporan Masuk', 'Laporan'],
   ['catat', 'Buat Kuitansi', 'Catat'],
-  ['kuitansi', 'Riwayat Kuitansi', 'Riwayat'],
-  ['akun', 'Akun PUK', 'Akun']
+  ['kuitansi', 'Riwayat Kuitansi', 'Riwayat']
 ];
-
-const TABS_PUK = [
-  ['beranda', 'Beranda', 'Beranda'],
-  ['lapor', 'Lapor Pembayaran', 'Lapor'],
-  ['kuitansiku', 'Kuitansi Saya', 'Kuitansi']
-];
-
-const TAB_UTAMA = ['catat', 'lapor'];
-
-const GAYA_DESKTOP = `
-@media (min-width:700px){
-  nav{max-width:660px}
-  .pwa-bar{max-width:660px}
-}
-@media (min-width:820px){
-  main{max-width:1180px;padding:28px 28px 150px}
-  main#content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:22px;align-items:start}
-  main#content>*{grid-column:1/-1;min-width:0}
-  main#content:has(.card ~ .card)>.card,main#content:has(.card ~ .card)~*{grid-column:auto}
-  main#content>.card:only-of-type,main#content:not(:has(.card ~ .card))>.card{max-width:820px}
-  .rk{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}
-  .rk>.rk-judul{grid-column:1/-1;max-width:none;margin:4px 2px 0}
-  .rk>.rk-item,.rk>.rk-wa{max-width:none;margin:0}
-  .sub-tab{max-width:460px}
-  .puk-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:1px;background:#e6ebf2}
-  .puk-baris{background:#fff;border-top:0}
-  .kpi-panel{margin-bottom:26px}
-  .kpi{padding:20px 24px}
-  .kpi-nilai{font-size:34px}
-  .kas-saldo{padding:20px 26px}
-  .card .btn{width:auto;min-width:240px}
-  .card .btn.alt{min-width:0}
-}
-@media (min-width:1000px){
-  header{position:sticky;top:0;z-index:12;height:76px;padding:0 28px}
-  header b{font-size:19px}
-  nav{top:76px;left:0;right:auto;bottom:0;width:272px;max-width:none;margin:0;padding:18px 14px;flex-direction:column;justify-content:flex-start;gap:6px;overflow-y:auto;background:#fff;border:0;border-right:1px solid #dce5ef;border-radius:0;box-shadow:none}
-  nav button,nav button.utama{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:14px;min-height:50px;padding:0 16px;border-radius:12px;font-size:15px;font-weight:600;letter-spacing:0;text-align:left;color:#475569;transition:background .15s ease,color .15s ease}
-  nav button:hover:not(.on){background:#eef4fb;color:#0756a3}
-  nav button.on,nav button.utama.on{background:#0756a3;color:#fff}
-  nav button .nav-label{display:none}
-  nav button::after{content:attr(aria-label);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  nav button.utama{margin:4px 0;font-weight:700;color:#0756a3;background:#eaf3fd;box-shadow:inset 0 0 0 1px #cfe2f7}
-  nav button.utama:hover:not(.on){background:#dcebfb;color:#063e78}
-  nav button.utama.on{color:#fff;background:#0756a3;box-shadow:none}
-  nav button.utama .nav-ikon,nav button.utama.on .nav-ikon{width:26px;height:26px;margin:0;border:0;background:none;box-shadow:none;color:inherit}
-  nav button.utama svg{width:26px;height:26px;stroke-width:2.4}
-  main{margin:0 0 0 272px;max-width:none;padding:30px max(32px,calc((100vw - 272px - 1240px)/2)) 56px}
-  #toast{bottom:28px}
-  body:has(#appView:not([hidden])) #toast{bottom:28px}
-  body:has(#appView:not([hidden])) .pwa-bar{left:auto;right:20px;bottom:20px;margin:0}
-  header{background:#0b4a8c;border-bottom:2px solid #f4b942;box-shadow:0 1px 0 rgba(7,47,88,.18)}
-  header small{margin-top:2px;font-size:13px;opacity:.82}
-  header button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:10px;box-shadow:none;padding:8px 18px;font-size:14px;transition:background .15s ease}
-  header button:hover{background:rgba(255,255,255,.14);color:#fff;border-color:#fff}
-  header button:focus-visible,nav button:focus-visible{outline:3px solid #f4b942;outline-offset:2px}
-  nav{padding:20px 14px;gap:4px}
-  nav button,nav button.utama{min-height:46px;border-radius:10px;font-size:15px;position:relative}
-  nav button svg{width:22px;height:22px}
-  nav button.on{background:#e8f1fb;color:#063e78;box-shadow:none}
-  nav button.on::before{content:"";position:absolute;left:-14px;top:9px;bottom:9px;width:4px;border-radius:0 4px 4px 0;background:#0756a3}
-  nav button.utama{margin:10px 0 6px;background:#0756a3;color:#fff;box-shadow:none}
-  nav button.utama:hover:not(.on){background:#063e78;color:#fff}
-  nav button.utama.on{background:#063e78;color:#fff}
-  nav button.utama.on::before{display:none}
-  nav button.utama svg{width:22px;height:22px;stroke-width:2.2}
-  nav button.utama .nav-ikon,nav button.utama.on .nav-ikon{width:22px;height:22px}
-  main{background:#f3f6fa}
-  .card{border-color:#dfe6ef;border-radius:14px;box-shadow:0 1px 2px rgba(20,50,80,.05);padding:22px 24px}
-  .card h3{font-size:18px;margin-bottom:14px}
-  .kas-saldo{padding:18px 26px;border-radius:12px}
-  .kas-saldo-nilai{font-size:34px}
-  .kpi-panel{border-radius:12px;border-color:#dfe6ef}
-  .kpi-label{letter-spacing:.08em}
-  .fgrid{display:grid;gap:0 18px}
-  .fgrid.fg3{grid-template-columns:1.2fr 1.4fr .8fr}
-  .fgrid.fg2{grid-template-columns:1fr 1.2fr}
-  .fgrid>div{min-width:0}
-  .card:has(.fgrid){max-width:760px}
-  .card .btn{min-width:0;padding-left:28px;padding-right:28px}
-  .card:has(#fTotal) .btn{margin-top:10px}
-  .rk-aksi button:hover,.sub-tab button:not(.on):hover,.kas-jenis button:hover{background:#eaf1fa}
-  .rk-aksi button,.sub-tab button,.kas-jenis button,.btn{transition:background .15s ease}
-  nav button,nav button.utama{padding:0 12px;gap:12px}
-  .rk-item{border-color:#dfe6ef;border-radius:14px;padding:16px 18px;margin-bottom:0;box-shadow:0 1px 2px rgba(20,50,80,.05)}
-  .rk-nama{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
-  .rk-nama .lencana,.rk-nama .badge{margin-left:0}
-  .rk-aksi button{border-width:1px;border-color:#cfdbea}
-  .rk-aksi button:disabled{background:#f6f8fb;color:#7c8aa0;border-color:#e3e9f1;opacity:1}
-  .rk-wa{font-weight:700;box-shadow:none;transition:background .15s ease}
-  .rk-wa:hover{background:#20c05c}
-  .rk-item>.btn{width:100%;min-height:48px;margin-top:10px;padding:12px 16px;font-size:17px}
-  .row{border-top-color:#e6ebf2}
-  .row .btn.sm{min-height:40px;padding:8px 16px;font-size:14px;border-width:1px;border-color:#b9cde4}
-  .row .btn.sm:hover{background:#eaf1fa}
-  .sub-tab button{transition:background .15s ease}
-}
-@media (min-width:1500px){
-  main{padding-left:max(40px,calc((100vw - 272px - 1380px)/2));padding-right:max(40px,calc((100vw - 272px - 1380px)/2))}
-  .rk{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
-}
-`;
-
-function pasangGayaDesktop() {
-  const el = document.createElement('style');
-  el.id = 'gayaDesktop';
-  el.textContent = GAYA_DESKTOP;
-  document.head.appendChild(el);
-}
-
-function tabsAktif() {
-  return isPUK() ? TABS_PUK : TABS_PC;
-}
 
 function showTab(t) {
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
@@ -196,19 +71,18 @@ function render() {
   $('loginView').hidden = true;
   $('appView').hidden = false;
 
-  const tabs = tabsAktif();
+  const tabs = TABS_PC;
   if (pengaturanDibuka()) S.tab = 'pengaturan';
   else if (!tabs.some(t => t[0] === S.tab)) S.tab = tabs[0][0];
 
-  $('who').textContent = isPUK() ? 'PUK ' + namaPUKSaya() : (S.pengaturan.namaPC || 'PP FSP RTMM-SPSI');
-  $('role').textContent = isPUK() ? 'Akun PUK' : 'Dashboard PP';
+  $('who').textContent = S.pengaturan.namaPC || 'Pengurus Cabang';
+  $('role').textContent = 'Dashboard PC';
 
   $('nav').innerHTML = tabs.map(t => {
     const aktif = t[0] === S.tab;
-    const kelas = (TAB_UTAMA.indexOf(t[0]) >= 0 ? 'utama' : '') + (aktif ? ' on' : '');
-    const n = t[0] === 'laporan' ? jumlahLaporanMenunggu() : 0;
+    const kelas = (t[0] === 'catat' ? 'utama' : '') + (aktif ? ' on' : '');
     return '<button class="' + kelas.trim() + '" aria-label="' + esc(t[1]) + '"' + (aktif ? ' aria-current="page"' : '') + ' onclick="showTab(\'' + t[0] + '\')">' +
-      '<span class="nav-ikon"><svg viewBox="0 0 24 24" aria-hidden="true">' + IKON_NAV[t[0]] + '</svg>' + (n ? '<i class="nav-badge">' + n + '</i>' : '') + '</span>' +
+      '<span class="nav-ikon"><svg viewBox="0 0 24 24" aria-hidden="true">' + IKON_NAV[t[0]] + '</svg></span>' +
       '<span class="nav-label">' + esc(t[2]) + '</span></button>';
   }).join('');
 
@@ -238,6 +112,142 @@ function render() {
     }
   }
   S.lastTab = S.tab;
+}
+
+const GAYA_SUKSES = `
+#sukses{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 38%,rgba(0,85,165,.55),rgba(8,20,38,.88));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:skFade .35s ease both;overflow:hidden}
+#sukses.keluar{animation:skFadeOut .32s ease forwards}
+#sukses .sk-kartu{position:relative;width:min(92%,380px);padding:34px 24px 36px;text-align:center;background:#fff;border-radius:26px;box-shadow:0 24px 70px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.6) inset;animation:skKartu .7s cubic-bezier(.2,1.25,.35,1) both}
+#sukses .sk-kartu::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;border-radius:26px 26px 0 0;background:linear-gradient(90deg,#0055a5,#fdb913,#16a34a);background-size:200% 100%;animation:skGaris 2.4s linear infinite}
+#sukses .sk-lingkar{position:relative;width:112px;height:112px;margin:0 auto 18px}
+#sukses .sk-cincin{position:absolute;inset:0;border-radius:50%;border:3px solid #16a34a;opacity:0;animation:skCincin 1.8s ease-out .35s infinite}
+#sukses .sk-cincin.b{animation-delay:.95s}
+#sukses .sk-inti{position:absolute;inset:0;border-radius:50%;background:linear-gradient(145deg,#22c55e,#15803d);box-shadow:0 10px 30px rgba(22,163,74,.55);animation:skInti .6s cubic-bezier(.3,1.5,.5,1) .15s both}
+#sukses svg.sk-ikon{position:absolute;inset:0;width:100%;height:100%}
+#sukses .sk-centang{fill:none;stroke:#fff;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60;animation:skGambar .5s ease .6s forwards}
+#sukses .sk-judul{font-size:23px;font-weight:800;color:#0f1f12;letter-spacing:-.2px;animation:skNaik .5s ease .75s both}
+#sukses .sk-nominal{margin-top:8px;font-size:34px;font-weight:800;color:#0055a5;font-variant-numeric:tabular-nums;animation:skNaik .5s ease .85s both}
+#sukses .sk-nominal.keluar{color:#b91c1c}
+#sukses .sk-detail{margin-top:8px;font-size:15px;line-height:1.45;color:#4b5563;overflow-wrap:anywhere;animation:skNaik .5s ease .95s both}
+#sukses .sk-aksi{display:flex;gap:10px;margin-top:22px;animation:skNaik .5s ease 1.05s both}
+#sukses .sk-aksi button{flex:1;min-height:50px;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer}
+#sukses .sk-aksi .utama{background:#0055a5;color:#fff;border:0;box-shadow:0 6px 16px rgba(0,85,165,.4)}
+#sukses .sk-aksi .tutup{background:#fff;color:#0055a5;border:2px solid #0055a5}
+#sukses .sk-bar{position:absolute;left:24px;right:24px;bottom:10px;height:3px;border-radius:3px;background:#e5e7eb;overflow:hidden}
+#sukses .sk-bar i{display:block;height:100%;background:#16a34a;transform-origin:left;animation:skBar var(--dur,3.2s) linear 1.1s both}
+#sukses .sk-konfeti{position:absolute;top:-24px;width:var(--w,9px);height:var(--h,14px);background:var(--c);border-radius:2px;opacity:0;pointer-events:none;animation:skJatuh var(--t,2.6s) cubic-bezier(.2,.7,.4,1) var(--d,0s) forwards}
+@keyframes skFade{from{opacity:0}to{opacity:1}}
+@keyframes skFadeOut{to{opacity:0}}
+@keyframes skKartu{0%{opacity:0;transform:translateY(60px) scale(.8)}100%{opacity:1;transform:none}}
+@keyframes skGaris{to{background-position:200% 0}}
+@keyframes skInti{0%{transform:scale(0)}100%{transform:scale(1)}}
+@keyframes skGambar{to{stroke-dashoffset:0}}
+@keyframes skCincin{0%{opacity:.75;transform:scale(1)}100%{opacity:0;transform:scale(1.75)}}
+@keyframes skNaik{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes skBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes skJatuh{0%{opacity:1;transform:translate3d(0,0,0) rotate(0)}100%{opacity:0;transform:translate3d(var(--x,0),105vh,0) rotate(var(--r,540deg))}}
+@media (prefers-reduced-motion:reduce){#sukses *,#sukses{animation-duration:.01s!important;animation-delay:0s!important}#sukses .sk-konfeti{display:none}}
+`;
+
+let timerSukses;
+
+function bunyiSukses() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    [[659.25, 0], [880, 0.11], [1318.5, 0.22]].forEach(([f, t]) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.16, ctx.currentTime + t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.4);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(ctx.currentTime + t);
+      o.stop(ctx.currentTime + t + 0.45);
+    });
+    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 1000);
+  } catch (e) {}
+}
+
+function tutupSukses() {
+  clearTimeout(timerSukses);
+  const el = $('sukses');
+  if (!el) return;
+  el.classList.add('keluar');
+  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 340);
+}
+
+function animasiSukses(o) {
+  o = o || {};
+  if (!$('gayaSukses')) {
+    const st = document.createElement('style');
+    st.id = 'gayaSukses';
+    st.textContent = GAYA_SUKSES;
+    document.head.appendChild(st);
+  }
+  const lama = $('sukses');
+  if (lama) lama.parentNode.removeChild(lama);
+  clearTimeout(timerSukses);
+
+  const warna = ['#0055a5', '#fdb913', '#16a34a', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316'];
+  let konfeti = '';
+  for (let i = 0; i < 46; i++) {
+    const kiri = Math.round(Math.random() * 100);
+    const geser = Math.round((Math.random() - 0.5) * 160);
+    konfeti += '<span class="sk-konfeti" style="left:' + kiri + '%;--x:' + geser + 'px;--c:' + warna[i % warna.length] +
+      ';--d:' + (0.25 + Math.random() * 0.9).toFixed(2) + 's;--t:' + (2.2 + Math.random() * 1.6).toFixed(2) +
+      's;--r:' + Math.round(360 + Math.random() * 720) + 'deg;--w:' + (6 + Math.round(Math.random() * 6)) + 'px;--h:' + (10 + Math.round(Math.random() * 8)) + 'px"></span>';
+  }
+
+  const durasi = o.aksi ? 6 : 3.2;
+  const el = document.createElement('div');
+  el.id = 'sukses';
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
+  el.innerHTML = konfeti +
+    '<div class="sk-kartu">' +
+    '<div class="sk-lingkar"><span class="sk-cincin"></span><span class="sk-cincin b"></span><div class="sk-inti"></div>' +
+    '<svg class="sk-ikon" viewBox="0 0 112 112" aria-hidden="true"><path class="sk-centang" d="M32 58 L49 75 L81 39"/></svg></div>' +
+    '<div class="sk-judul">' + esc(o.judul || 'Berhasil') + '</div>' +
+    (o.nominal != null ? '<div class="sk-nominal' + (o.jenis === 'keluar' ? ' keluar' : '') + '" id="skNominal">' + esc(rp(0)) + '</div>' : '') +
+    (o.detail ? '<div class="sk-detail">' + esc(o.detail) + '</div>' : '') +
+    (o.aksi ? '<div class="sk-aksi"><button type="button" class="tutup" id="skTutup">Tutup</button><button type="button" class="utama" id="skAksi">' + esc(o.aksi.label) + '</button></div>' : '') +
+    '<div class="sk-bar" style="--dur:' + durasi + 's"><i></i></div></div>';
+  document.body.appendChild(el);
+
+  el.addEventListener('click', e => {
+    if (e.target.id === 'skAksi') {
+      tutupSukses();
+      if (o.aksi && o.aksi.fn) o.aksi.fn();
+      return;
+    }
+    tutupSukses();
+  });
+
+  if (o.nominal != null) {
+    const tampil = $('skNominal');
+    const total = Math.max(0, Number(o.nominal) || 0);
+    const mulai = performance.now() + 850;
+    const lamaHitung = 900;
+    const langkah = t => {
+      if (!$('skNominal')) return;
+      const p = Math.min(1, Math.max(0, (t - mulai) / lamaHitung));
+      const e = 1 - Math.pow(1 - p, 3);
+      tampil.textContent = rp(Math.round(total * e));
+      if (p < 1) requestAnimationFrame(langkah);
+    };
+    requestAnimationFrame(langkah);
+  }
+
+  if (navigator.vibrate) {
+    try { navigator.vibrate([30, 50, 70]); } catch (e) {}
+  }
+  setTimeout(bunyiSukses, 650);
+  timerSukses = setTimeout(tutupSukses, (durasi + 1.1) * 1000);
 }
 
 function pasangGayaLansia() {
@@ -284,7 +294,6 @@ document.addEventListener('input', e => {
 });
 
 pasangGayaLansia();
-pasangGayaDesktop();
 
 function pasangKetukRahasia() {
   const el = $('who');
@@ -305,14 +314,24 @@ pasangKetukRahasia();
 
 window.addEventListener('hashchange', render);
 
+const NAMA_PENERIMA_BANTUAN = 'Bapak Riski';
+
+function salamWaktu() {
+  const jam = new Date().getHours();
+  if (jam < 11) return 'Selamat pagi';
+  if (jam < 15) return 'Selamat siang';
+  if (jam < 18) return 'Selamat sore';
+  return 'Selamat malam';
+}
+
 function pesanBantuan() {
-  const baris = ['Halo Mas Riski, saya mengalami kendala pada aplikasi Kuitansi COS.', ''];
-  if (S && S.profile) {
-    baris.push('Pengguna: ' + (isPUK() ? 'PUK ' + namaPUKSaya() : ((S.pengaturan && S.pengaturan.namaPC) || 'PP FSP RTMM-SPSI')));
-    const tab = tabsAktif().filter(t => t[0] === S.tab)[0];
-    if (tab) baris.push('Menu: ' + tab[1]);
-  }
-  baris.push('Kendala: ');
+  const nama = (S && S.profile && S.pengaturan && S.pengaturan.namaPC) || '';
+  const baris = [salamWaktu() + ', ' + NAMA_PENERIMA_BANTUAN + '.', ''];
+  baris.push(nama ? 'Saya dari ' + nama + ', pengguna aplikasi Kuitansi COS.' : 'Saya pengguna aplikasi Kuitansi COS.');
+  baris.push('Mohon bantuan Bapak terkait kendala berikut:', '');
+  const tab = S && S.profile ? TABS_PC.filter(t => t[0] === S.tab)[0] : null;
+  if (tab) baris.push('Menu: ' + tab[1]);
+  baris.push('Kendala: ', '', 'Terima kasih atas bantuannya.');
   return baris.join('\n');
 }
 
