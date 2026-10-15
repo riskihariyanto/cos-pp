@@ -82,14 +82,16 @@ function viewLaporan() {
   if (!daftar.length) return '';
   const key = bulanAktifLaporan(daftar);
   const r = rekapBulan(entri, key);
+  pasangGayaLaporan();
   const opsi = daftar.map(k => '<option value="' + k + '"' + (k === key ? ' selected' : '') + '>' + esc(labelPeriode(k)) + '</option>').join('');
   return '<section class="card"><h2>Laporan Pemasukan dan Pengeluaran</h2>' +
     '<label for="lapBulan">Bulan laporan</label>' +
     '<select id="lapBulan" onchange="ubahBulanLaporan()">' + opsi + '</select>' +
-    '<p class="hint">Saldo awal bulan ini: ' + esc(rp(r.awal)) + '</p>' +
-    '<div class="kas-ringkas"><div><span>Pemasukan</span><b class="kas-masuk">' + esc(rp(r.masuk)) + '</b></div>' +
-    '<div><span>Pengeluaran</span><b class="kas-keluar">' + esc(rp(r.keluar)) + '</b></div>' +
-    '<div><span>Saldo Akhir</span><b>' + esc(rp(r.akhir)) + '</b></div></div>' +
+    '<div class="lap-ringkas">' +
+    '<div class="lap-r"><span>Saldo Awal</span><b>' + esc(rp(r.awal)) + '</b></div>' +
+    '<div class="lap-r"><span>Pemasukan</span><b class="kas-masuk">' + esc(rp(r.masuk)) + '</b></div>' +
+    '<div class="lap-r"><span>Pengeluaran</span><b class="kas-keluar">' + esc(rp(r.keluar)) + '</b></div>' +
+    '<div class="lap-r total"><span>Saldo Akhir</span><b>' + esc(rp(r.akhir)) + '</b></div></div>' +
     '<div class="rk-aksi">' +
     '<button type="button" onclick="pratinjauLaporan()">Pratinjau</button>' +
     '<button type="button" onclick="cetakLaporanPDF()">Unduh PDF</button>' +
@@ -249,7 +251,19 @@ function cetakLaporanPDF() {
 const LEBAR_LAPORAN = 794;
 
 const GAYA_LAPORAN = `
-.pv-stage.lap{align-items:flex-start}
+.pv-stage.lap{display:block;position:relative;padding:0;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab}
+.pv-stage.lap.geser{cursor:grabbing}
+.pv-stage.lap .pv-wrap{position:absolute;left:0;top:0;transform-origin:0 0}
+.lap-ringkas{margin:12px 0 14px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+.lap-r{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:11px 14px;background:#fff;border-top:1px solid #e2e8f0;font-size:14px}
+.lap-r:first-child{border-top:0}
+.lap-r span{font-weight:600;color:#475569}
+.lap-r b{font-weight:800;color:#142b45;text-align:right;overflow-wrap:anywhere}
+.lap-r b.kas-masuk{color:#168653}
+.lap-r b.kas-keluar{color:#dc2626}
+.lap-r.total{background:#eaf2fb}
+.lap-r.total span{font-weight:800;color:#063e78}
+.lap-r.total b{font-size:15px}
 .lap-kertas{position:absolute;left:0;top:0;width:794px;box-sizing:border-box;padding:57px;background:#fff;color:#1a1a1a;font-family:Helvetica,Arial,sans-serif;transform-origin:0 0}
 .lap-kopgbr{display:block;width:100%;height:auto;margin-bottom:18px}
 .lap-kopteks{margin-bottom:22px;padding-bottom:10px;text-align:center;border-bottom:3px double #1a1a1a}
@@ -260,7 +274,7 @@ const GAYA_LAPORAN = `
 .lap-awal{margin:18px 0 8px;font-size:13px;font-weight:700}
 .lap-tabel{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}
 .lap-tabel th{padding:7px 6px;color:#fff;background:#0055a5;border:1px solid #bec4cc;font-size:11.5px;font-weight:700;text-align:center;text-transform:none}
-.lap-tabel td{padding:6px;border:1px solid #bec4cc;vertical-align:top;overflow-wrap:anywhere}
+.lap-tabel td{padding:6px;border:1px solid #bec4cc;vertical-align:top;white-space:normal;overflow-wrap:anywhere}
 .lap-tabel td.t{white-space:nowrap}
 .lap-tabel td.a{text-align:right;white-space:nowrap}
 .lap-tabel tfoot td{background:#eef3f9;font-weight:700}
@@ -314,6 +328,12 @@ function htmlLaporan(key) {
 }
 
 let lapRiwayat = false;
+let lapZoom = null;
+
+const ZOOM_MIN = 1;
+const ZOOM_MAX = 4;
+const ZOOM_KETUK = 2.5;
+const TEPI_ZOOM = 12;
 
 function skalaLaporan() {
   const st = $('lapStage');
@@ -324,6 +344,204 @@ function skalaLaporan() {
   w.style.width = (LEBAR_LAPORAN * s).toFixed(1) + 'px';
   w.style.height = (k.offsetHeight * s).toFixed(1) + 'px';
   k.style.transform = 'scale(' + s.toFixed(4) + ')';
+  if (lapZoom) lapZoom.terapkan();
+}
+
+function pasangZoomLaporan(st, w) {
+  const p = { z: ZOOM_MIN, x: 0, y: TEPI_ZOOM };
+  const jari = new Map();
+  let pan = null;
+  let cubit = null;
+  let kecepatan = { x: 0, y: 0 };
+  let sampel = [];
+  let bingkai = 0;
+  let ketukAkhir = null;
+
+  const lebarIsi = () => parseFloat(w.style.width) || w.offsetWidth;
+  const tinggiIsi = () => parseFloat(w.style.height) || w.offsetHeight;
+
+  function batas(nilai, isi, ruang) {
+    const total = isi * p.z;
+    if (total + TEPI_ZOOM * 2 <= ruang) return null;
+    return Math.max(ruang - total - TEPI_ZOOM, Math.min(TEPI_ZOOM, nilai));
+  }
+
+  function terapkan() {
+    const bx = batas(p.x, lebarIsi(), st.clientWidth);
+    const by = batas(p.y, tinggiIsi(), st.clientHeight);
+    p.x = bx === null ? (st.clientWidth - lebarIsi() * p.z) / 2 : bx;
+    p.y = by === null ? TEPI_ZOOM : by;
+    w.style.transform = 'translate(' + p.x.toFixed(2) + 'px,' + p.y.toFixed(2) + 'px) scale(' + p.z.toFixed(4) + ')';
+  }
+
+  function titikStage(e) {
+    const r = st.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function zoomKe(zBaru, cx, cy) {
+    const z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zBaru));
+    const px = (cx - p.x) / p.z;
+    const py = (cy - p.y) / p.z;
+    p.z = z;
+    p.x = cx - px * z;
+    p.y = cy - py * z;
+    terapkan();
+  }
+
+  function hentikanInersia() {
+    if (bingkai) cancelAnimationFrame(bingkai);
+    bingkai = 0;
+  }
+
+  function mulaiPan(id) {
+    const t = jari.get(id);
+    pan = { id, sx: t.x, sy: t.y, ox: p.x, oy: p.y, gerak: 0 };
+    sampel = [{ t: performance.now(), x: t.x, y: t.y }];
+  }
+
+  function mulaiCubit() {
+    const [a, b] = Array.from(jari.values());
+    const r = st.getBoundingClientRect();
+    const cx = (a.x + b.x) / 2 - r.left;
+    const cy = (a.y + b.y) / 2 - r.top;
+    cubit = {
+      jarak: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+      z: p.z,
+      px: (cx - p.x) / p.z,
+      py: (cy - p.y) / p.z
+    };
+    pan = null;
+  }
+
+  function inersia() {
+    let terakhir = performance.now();
+    const langkah = now => {
+      const dt = Math.min(48, now - terakhir);
+      terakhir = now;
+      const redam = Math.pow(0.94, dt / 16);
+      kecepatan.x *= redam;
+      kecepatan.y *= redam;
+      const sx = p.x;
+      const sy = p.y;
+      p.x += kecepatan.x * dt;
+      p.y += kecepatan.y * dt;
+      terapkan();
+      if (p.x === sx) kecepatan.x = 0;
+      if (p.y === sy) kecepatan.y = 0;
+      if (Math.hypot(kecepatan.x, kecepatan.y) < 0.02) {
+        bingkai = 0;
+        return;
+      }
+      bingkai = requestAnimationFrame(langkah);
+    };
+    bingkai = requestAnimationFrame(langkah);
+  }
+
+  function ketukGanda(e) {
+    const t = titikStage(e);
+    const now = performance.now();
+    if (ketukAkhir && now - ketukAkhir.t < 320 && Math.hypot(t.x - ketukAkhir.x, t.y - ketukAkhir.y) < 32) {
+      ketukAkhir = null;
+      if (p.z > ZOOM_MIN * 1.05) {
+        p.z = ZOOM_MIN;
+        terapkan();
+      } else {
+        zoomKe(ZOOM_KETUK, t.x, t.y);
+      }
+      return;
+    }
+    ketukAkhir = { t: now, x: t.x, y: t.y };
+  }
+
+  function turun(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    hentikanInersia();
+    const t = titikStage(e);
+    jari.set(e.pointerId, t);
+    try { st.setPointerCapture(e.pointerId); } catch (err) {}
+    if (jari.size === 1) {
+      mulaiPan(e.pointerId);
+      st.classList.add('geser');
+    } else if (jari.size === 2) {
+      mulaiCubit();
+    }
+  }
+
+  function gerak(e) {
+    if (!jari.has(e.pointerId)) return;
+    const t = titikStage(e);
+    jari.set(e.pointerId, t);
+    if (jari.size >= 2 && cubit) {
+      const [a, b] = Array.from(jari.values());
+      const cx = (a.x + b.x) / 2;
+      const cy = (a.y + b.y) / 2;
+      const z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, cubit.z * Math.hypot(a.x - b.x, a.y - b.y) / cubit.jarak));
+      p.z = z;
+      p.x = cx - cubit.px * z;
+      p.y = cy - cubit.py * z;
+      terapkan();
+      return;
+    }
+    if (pan && pan.id === e.pointerId) {
+      pan.gerak = Math.max(pan.gerak, Math.hypot(t.x - pan.sx, t.y - pan.sy));
+      p.x = pan.ox + t.x - pan.sx;
+      p.y = pan.oy + t.y - pan.sy;
+      terapkan();
+      const now = performance.now();
+      sampel.push({ t: now, x: t.x, y: t.y });
+      while (sampel.length > 2 && now - sampel[0].t > 100) sampel.shift();
+    }
+  }
+
+  function naik(e) {
+    if (!jari.has(e.pointerId)) return;
+    const t = jari.get(e.pointerId);
+    const dipan = pan && pan.id === e.pointerId ? pan : null;
+    jari.delete(e.pointerId);
+    try { st.releasePointerCapture(e.pointerId); } catch (err) {}
+    if (cubit) {
+      cubit = null;
+      if (jari.size === 1) mulaiPan(jari.keys().next().value);
+      return;
+    }
+    if (!dipan) return;
+    pan = null;
+    st.classList.remove('geser');
+    if (e.type === 'pointercancel') return;
+    if (dipan.gerak < 10) {
+      ketukGanda(e);
+      return;
+    }
+    const now = performance.now();
+    const awal = sampel[0];
+    const dt = now - awal.t;
+    if (dt > 0 && now - sampel[sampel.length - 1].t < 80) {
+      kecepatan = { x: (t.x - awal.x) / Math.max(dt, 16), y: (t.y - awal.y) / Math.max(dt, 16) };
+      if (Math.hypot(kecepatan.x, kecepatan.y) > 0.1) inersia();
+    }
+  }
+
+  function roda(e) {
+    e.preventDefault();
+    hentikanInersia();
+    if (e.ctrlKey) {
+      const t = titikStage(e);
+      zoomKe(p.z * Math.exp(-e.deltaY * 0.01), t.x, t.y);
+      return;
+    }
+    p.x -= e.deltaX;
+    p.y -= e.deltaY;
+    terapkan();
+  }
+
+  st.addEventListener('pointerdown', turun);
+  st.addEventListener('pointermove', gerak);
+  st.addEventListener('pointerup', naik);
+  st.addEventListener('pointercancel', naik);
+  st.addEventListener('wheel', roda, { passive: false });
+
+  return { terapkan, batal: hentikanInersia };
 }
 
 function tombolEscLaporan(e) {
@@ -331,6 +549,8 @@ function tombolEscLaporan(e) {
 }
 
 function bersihPratinjauLaporan() {
+  if (lapZoom) lapZoom.batal();
+  lapZoom = null;
   const ov = $('lapOv');
   if (ov) ov.remove();
   document.body.classList.remove('pv-buka');
@@ -373,6 +593,7 @@ function pratinjauLaporan() {
     '</div>';
   document.body.appendChild(ov);
   document.body.classList.add('pv-buka');
+  lapZoom = pasangZoomLaporan($('lapStage'), $('lapWrap'));
   skalaLaporan();
   window.addEventListener('resize', skalaLaporan);
   document.addEventListener('keydown', tombolEscLaporan);
@@ -583,7 +804,9 @@ async function eksporLaporanXLSX() {
 
 const viewRiwayatLaporanAsli = VIEWS.kuitansi;
 
+const PESAN_LAPORAN_KOSONG = '<section class="card"><h2>Laporan Pemasukan dan Pengeluaran</h2><p class="kas-kosong">Belum ada transaksi untuk dilaporkan.</p></section>';
+
 VIEWS.kuitansi = () => {
   const html = viewRiwayatLaporanAsli();
-  return subRiwayat === 'kas' ? html.replace('</div>', m => m + viewLaporan()) : html;
+  return subRiwayat === 'laporan' ? html + (viewLaporan() || PESAN_LAPORAN_KOSONG) : html;
 };
