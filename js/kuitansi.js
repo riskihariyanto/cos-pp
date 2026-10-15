@@ -6,6 +6,7 @@ const TINGGI_KERTAS = 592;
 let pvAktif = null;
 let pvFoto = null;
 let pvRiwayat = false;
+let pvZoom = null;
 
 function buatQR(teks) {
   const q = qrcode(0, 'M');
@@ -369,6 +370,9 @@ const GAYA_PRATINJAU = `
 .pv-act .pv-pdf,.pv-act .pv-foto{background:#fff;border:2px solid var(--pri);color:var(--pri)}
 .pv-act .pv-pdf:active,.pv-act .pv-foto:active{background:#e8f0fa}
 .pv-act button:disabled{opacity:.6;cursor:wait}
+.pv-stage.zoom{display:block;position:relative;padding:0;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab}
+.pv-stage.zoom.geser{cursor:grabbing}
+.pv-stage.zoom .pv-wrap{position:absolute;left:0;top:0;transform-origin:0 0}
 .pv-gudang{position:absolute;left:0;top:0;width:840px;height:592px;z-index:-1;pointer-events:none}
 .pv-gudang .kertas{position:relative}
 `;
@@ -392,6 +396,7 @@ function skalaKertas() {
   w.style.width = (LEBAR_KERTAS * s).toFixed(1) + 'px';
   w.style.height = (TINGGI_KERTAS * s).toFixed(1) + 'px';
   k.style.transform = 'scale(' + s.toFixed(4) + ')';
+  if (pvZoom) pvZoom.terapkan();
 }
 
 function tombolEsc(e) {
@@ -417,7 +422,7 @@ function previewKuitansi(pid, key) {
   ov.setAttribute('aria-label', 'Pratinjau kuitansi');
   ov.innerHTML =
     '<div class="pv-bar"><b>Pratinjau Kuitansi</b><button type="button" class="pv-x" onclick="tutupPreview()">Tutup</button></div>' +
-    '<div class="pv-stage" id="pvStage"><div class="pv-wrap" id="pvWrap">' + htmlKertas(m) + '</div></div>' +
+    '<div class="pv-stage zoom" id="pvStage"><div class="pv-wrap" id="pvWrap">' + htmlKertas(m) + '</div></div>' +
     '<div class="pv-act">' +
     '<button type="button" class="pv-wa" onclick="bagikanWAPratinjau(this)">' + IKON_WA + '<span>WhatsApp (Foto)</span></button>' +
     '<button type="button" class="pv-pdf" onclick="unduhPDFPratinjau()">Unduh PDF</button>' +
@@ -425,6 +430,7 @@ function previewKuitansi(pid, key) {
     '</div>';
   document.body.appendChild(ov);
   document.body.classList.add('pv-buka');
+  pvZoom = pasangZoomLaporan($('pvStage'), $('pvWrap'), true);
   skalaKertas();
   window.addEventListener('resize', skalaKertas);
   document.addEventListener('keydown', tombolEsc);
@@ -445,6 +451,8 @@ function previewKuitansi(pid, key) {
 }
 
 function bersihPratinjau() {
+  if (pvZoom) pvZoom.batal();
+  pvZoom = null;
   const ov = $('pvOv');
   if (ov) ov.remove();
   document.body.classList.remove('pv-buka');
