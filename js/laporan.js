@@ -347,7 +347,7 @@ function skalaLaporan() {
   if (lapZoom) lapZoom.terapkan();
 }
 
-function pasangZoomLaporan(st, w) {
+function pasangZoomLaporan(st, w, tengahY) {
   const p = { z: ZOOM_MIN, x: 0, y: TEPI_ZOOM };
   const jari = new Map();
   let pan = null;
@@ -370,7 +370,7 @@ function pasangZoomLaporan(st, w) {
     const bx = batas(p.x, lebarIsi(), st.clientWidth);
     const by = batas(p.y, tinggiIsi(), st.clientHeight);
     p.x = bx === null ? (st.clientWidth - lebarIsi() * p.z) / 2 : bx;
-    p.y = by === null ? TEPI_ZOOM : by;
+    p.y = by === null ? (tengahY ? (st.clientHeight - tinggiIsi() * p.z) / 2 : TEPI_ZOOM) : by;
     w.style.transform = 'translate(' + p.x.toFixed(2) + 'px,' + p.y.toFixed(2) + 'px) scale(' + p.z.toFixed(4) + ')';
   }
 
