@@ -196,8 +196,7 @@ function viewCatat() {
     (pilih === '__baru' ? '<label for="fPuk">Nama PUK baru</label><input id="fPuk" autocomplete="off" placeholder="Ketik nama PUK, tanpa kata PUK" value="' + esc(nama) + '" onchange="ubahPUKCatat()">' : '') +
     '<label for="fTanggal">Tanggal terima</label><input id="fTanggal" type="date" value="' + hari + '" onchange="ubahTanggalCatat()">' +
     '<label for="fBulan">Periode iuran (bulan)</label><select id="fBulan" onchange="ubahPeriodeCatat()">' + optBulan + '</select>' +
-    '<label for="fTahun">Tahun</label><input id="fTahun" type="number" value="' + t + '" onchange="ubahPeriodeCatat()">' +
-    '<p class="hint">Iuran yang dibayar pada bulan berjalan dihitung untuk bulan sebelumnya. Diterima ' + esc(fmtTgl(hari)) + ', periode iuran ' + esc(labelPeriode(key)) + '.</p>';
+    '<label for="fTahun">Tahun</label><input id="fTahun" type="number" value="' + t + '" onchange="ubahPeriodeCatat()">';
 
   if (pid && periodeKunci(ada)) {
     return kepala + '<p class="peringatan">' + esc(pesanAdmin()) + '</p>' + panelTerkunci(pid, key, ada) + '</section>';
