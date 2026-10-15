@@ -9,6 +9,7 @@ let kasList = [];
 let kasIds = {};
 let subCatat = 'kuitansi';
 let subRiwayat = 'kuitansi';
+let subKas = 'laporan';
 let draftKas = { jenis: 'masuk', tgl: '', nominal: '', ket: '' };
 let sedangSinkron = false;
 let pengenalSuara = null;
@@ -178,6 +179,11 @@ function pilihJenisKas(j) {
 function pilihSubRiwayat(k) {
   hentikanSuara();
   subRiwayat = k;
+  render();
+}
+
+function pilihSubKas(k) {
+  subKas = k === 'kas' ? 'kas' : 'laporan';
   render();
 }
 
@@ -537,7 +543,8 @@ VIEWS.beranda = () => kartuSaldo() + viewBerandaAsli();
 VIEWS.lapor = () => sakelarSub(subCatat, 'pilihSubCatat', [['kuitansi', 'Lapor Iuran'], ['kas', 'Kas Masuk/Keluar']]) +
   (subCatat === 'kas' ? viewKasForm() : viewLaporPukAsli());
 
-VIEWS.kas = () => viewLaporan() + viewKasRiwayat();
+VIEWS.kas = () => sakelarSub(subKas, 'pilihSubKas', [['laporan', 'Laporan'], ['kas', 'Kas Digital']]) +
+  (subKas === 'kas' ? viewKasRiwayat() : (viewLaporan() || PESAN_LAPORAN_KOSONG));
 
 function viewPengaturanPUK() {
   if (!isPUK()) return '';
